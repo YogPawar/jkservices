@@ -427,6 +427,49 @@ public class GlobalExceptionHandlerTest {
     assertEquals("RESOURCE_NOT_FOUND", problemDetail.getProperties().get("errorCode"));
   }
 
+  @Test
+  void shouldPreserveMultipleValidationErrorsForSameField() {
+
+    // Arrange
+    BindingResult bindingResult =
+        new BeanPropertyBindingResult(new Object(), "userRegistrationRequest");
+
+    bindingResult.addError(
+        new FieldError(
+            "userRegistrationRequest", "name", "", false, null, null, "Name is required"));
+
+    bindingResult.addError(
+        new FieldError(
+            "userRegistrationRequest",
+            "name",
+            "",
+            false,
+            null,
+            null,
+            "Name must contain at least 3 characters"));
+
+    MethodArgumentNotValidException exception =
+        new MethodArgumentNotValidException(null, bindingResult);
+
+    // Act
+    ResponseEntity<ProblemDetail> response =
+        exceptionHandler.handleMethodArgumentNotValid(exception, request);
+
+    ProblemDetail problemDetail = response.getBody();
+
+    // Assert
+    assertNotNull(problemDetail);
+
+    @SuppressWarnings("unchecked")
+    Map<String, List<String>> fieldErrors =
+        (Map<String, List<String>>) problemDetail.getProperties().get("fieldErrors");
+
+    assertNotNull(fieldErrors);
+    assertEquals(2, fieldErrors.get("name").size());
+    assertTrue(fieldErrors.get("name").contains("Name is required"));
+    assertTrue(fieldErrors.get("name").contains("Name must contain at least 3 characters"));
+  }
+
   private void dummyMethod(Long id) {
     // Used only to create MethodParameter for testing
   }

@@ -2,6 +2,9 @@ package com.jkservice.auth;
 
 import java.security.SecureRandom;
 import java.util.Locale;
+
+import com.jkservice.exception.BusinessException;
+import com.jkservice.exception.DuplicateResourceException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +51,7 @@ public class RegistrationService {
     Family f =
         families
             .findByInviteCodeAndActiveTrue(r.inviteCode().trim().toUpperCase(Locale.ROOT))
-            .orElseThrow(
-                () -> new IllegalArgumentException("Invalid or inactive family invite code"));
+            .orElseThrow(() -> new BusinessException("Invalid or inactive family invite code"));
     AppUser u = new AppUser();
     u.setFamily(f);
     u.setFullName(r.fullName());
@@ -68,7 +70,7 @@ public class RegistrationService {
 
   private void ensureEmailAvailable(String email) {
     if (users.existsByEmail(normalize(email)))
-      throw new IllegalArgumentException("Email is already registered");
+      throw new DuplicateResourceException("Email is already registered");
   }
 
   private String normalize(String email) {
