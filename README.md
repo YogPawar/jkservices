@@ -8,6 +8,7 @@ Family-based agricultural work, billing and payment ledger.
 - React + JavaScript + Vite + Material UI
 
 ## Run locally
+0. `docker compose --env-file .\config.env up -d mysql`
 1. `docker compose up -d mysql`
 2. Backend: `cd backend && mvn spring-boot:run`
 3. Frontend: `cd frontend && npm install && npm run dev`
@@ -38,7 +39,7 @@ $env:DB_PASSWORD = "shetipassword"
 
 
 
-Packaging 
+### Packaging 
 
 jpackage `
   --type app-image `
@@ -50,3 +51,24 @@ jpackage `
   --dest .\deployment\app-image `
 --java-options "-Dspring.profiles.active=prod" `
 --win-console
+
+
+### Maven  Command 
+    mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
+
+ ## Production Run 
+    cd D:\jkservice\backend
+
+    $env:DB_URL = "jdbc:mysql://localhost:3307/jkservicedb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata"
+    $env:DB_USERNAME = "jk"
+    cd D:\jkservice\backend
+    $env:DB_PASSWORD = Read-Host "Enter database password"
+    
+    mvn spring-boot:run "-Dspring-boot.run.profiles=prod"
+
+## Docker Commands
+    docker compose --env-file .\config.env config
+
+## Swagger 
+    http://localhost:8080/v3/api-docs
+    http://localhost:8080/swagger-ui/index.html

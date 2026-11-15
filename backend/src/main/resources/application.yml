@@ -1,30 +1,30 @@
-server:
-  port: 8080
 spring:
   application:
     name: jkservice-api
-  datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3307/jkservicedb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata}
-    username: ${DB_USERNAME:jk}
-    password: ${DB_PASSWORD:jkbro}
+
+  profiles:
+    default: dev
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
 logging:
   level:
     root: INFO
-    com.shetiledger: DEBUG
   file:
     name: logs/jkservice.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [corr=%X{correlationId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [corr=%X{correlationId:-}] %logger{36} - %msg%n"

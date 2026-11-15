@@ -182,8 +182,8 @@ public class GlobalExceptionHandlerTest {
 
     assertNotNull(fieldErrors);
     assertEquals(2, fieldErrors.size());
-    assertEquals("Name is required", fieldErrors.get("name"));
-    assertEquals("Invalid email format", fieldErrors.get("email"));
+    assertEquals(List.of("Name is required"), fieldErrors.get("name"));
+    assertEquals(List.of("Invalid email format"), fieldErrors.get("email"));
   }
 
   @Test
@@ -223,7 +223,7 @@ public class GlobalExceptionHandlerTest {
 
     assertNotNull(fieldErrors);
     assertEquals(1, fieldErrors.size());
-    assertEquals("must be greater than 0", fieldErrors.get("getUser.id"));
+    assertEquals(List.of("must be greater than 0"), fieldErrors.get("getUser.id"));
   }
 
   @Test
@@ -468,6 +468,26 @@ public class GlobalExceptionHandlerTest {
     assertEquals(2, fieldErrors.get("name").size());
     assertTrue(fieldErrors.get("name").contains("Name is required"));
     assertTrue(fieldErrors.get("name").contains("Name must contain at least 3 characters"));
+  }
+
+  @Test
+  void shouldNotExposeInternalExceptionDetails() {
+    // Arrange
+    Exception exception = new RuntimeException("Sensitive internal database details");
+
+    when(request.getMethod()).thenReturn("POST");
+
+    // Act
+    ResponseEntity<ProblemDetail> response =
+        exceptionHandler.handleUnexpectedException(exception, request);
+
+    // Assert
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    assertNotNull(response.getBody());
+
+    assertEquals("An unexpected error occurred", response.getBody().getDetail());
+
+    assertFalse(response.getBody().getDetail().contains("Sensitive internal database details"));
   }
 
   private void dummyMethod(Long id) {

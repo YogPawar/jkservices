@@ -31,3 +31,9 @@ Thumbs.db
 # Build output
 out/
 deployment/
+
+.env
+.env.*
+!.env.example
+config.env
+logs/

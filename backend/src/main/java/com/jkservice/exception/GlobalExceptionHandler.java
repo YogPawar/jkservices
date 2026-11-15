@@ -3,7 +3,9 @@ package com.jkservice.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +25,13 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
   private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(ResourceNotFoundException.class)
   public ResponseEntity<ProblemDetail> handleResourceNotFoundException(
       ResourceNotFoundException ex, HttpServletRequest request) {
+
     return buildErrorResponse(
         HttpStatus.NOT_FOUND,
         ApiErrorCode.RESOURCE_NOT_FOUND,
@@ -57,29 +61,6 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
   }
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ProblemDetail> handleUnexpectedException(
-      Exception ex, HttpServletRequest request) {
-
-    log.error(
-        "Unexpected error occurred while processing request: {}", request.getRequestURI(), ex);
-
-    return buildErrorResponse(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        ApiErrorCode.INTERNAL_SERVER_ERROR,
-        "An unexpected error occurred",
-        request.getRequestURI());
-  }
-
-  private ResponseEntity<ProblemDetail> buildErrorResponse(
-      HttpStatus httpStatus, ApiErrorCode errorCode, String message, String requestURI) {
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, message);
-    problemDetail.setTitle(httpStatus.getReasonPhrase());
-    problemDetail.setInstance(URI.create(requestURI));
-    problemDetail.setProperty("errorCode", errorCode.name());
-    return ResponseEntity.status(httpStatus).body(problemDetail);
-  }
-
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentNotValid(
       MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -91,11 +72,14 @@ public class GlobalExceptionHandler {
     problemDetail.setInstance(URI.create(request.getRequestURI()));
     problemDetail.setProperty("errorCode", ApiErrorCode.VALIDATION_FAILED.name());
 
-    Map<String, String> fieldErrors = new HashMap<>();
+    Map<String, List<String>> fieldErrors = new LinkedHashMap<>();
 
     ex.getBindingResult()
         .getFieldErrors()
-        .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
+        .forEach(error ->
+            fieldErrors
+                .computeIfAbsent(error.getField(), key -> new ArrayList<>())
+                .add(error.getDefaultMessage()));
 
     problemDetail.setProperty("fieldErrors", fieldErrors);
 
@@ -113,11 +97,13 @@ public class GlobalExceptionHandler {
     problemDetail.setInstance(URI.create(request.getRequestURI()));
     problemDetail.setProperty("errorCode", ApiErrorCode.VALIDATION_FAILED.name());
 
-    Map<String, String> fieldErrors = new HashMap<>();
+    Map<String, List<String>> fieldErrors = new LinkedHashMap<>();
 
     ex.getConstraintViolations()
         .forEach(violation ->
-            fieldErrors.put(violation.getPropertyPath().toString(), violation.getMessage()));
+            fieldErrors
+                .computeIfAbsent(violation.getPropertyPath().toString(), key -> new ArrayList<>())
+                .add(violation.getMessage()));
 
     problemDetail.setProperty("fieldErrors", fieldErrors);
 
@@ -199,5 +185,34 @@ public class GlobalExceptionHandler {
         ApiErrorCode.RESOURCE_NOT_FOUND,
         "Requested resource was not found",
         request.getRequestURI());
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ProblemDetail> handleUnexpectedException(
+      Exception ex, HttpServletRequest request) {
+
+    log.error(
+        "Unexpected server error | method={} | path={} | errorCode={}",
+        request.getMethod(),
+        request.getRequestURI(),
+        ApiErrorCode.INTERNAL_SERVER_ERROR,
+        ex);
+    return buildErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ApiErrorCode.INTERNAL_SERVER_ERROR,
+        "An unexpected error occurred",
+        request.getRequestURI());
+  }
+
+  private ResponseEntity<ProblemDetail> buildErrorResponse(
+      HttpStatus httpStatus, ApiErrorCode errorCode, String message, String requestURI) {
+
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(httpStatus, message);
+
+    problemDetail.setTitle(httpStatus.getReasonPhrase());
+    problemDetail.setInstance(URI.create(requestURI));
+    problemDetail.setProperty("errorCode", errorCode.name());
+
+    return ResponseEntity.status(httpStatus).body(problemDetail);
   }
 }
