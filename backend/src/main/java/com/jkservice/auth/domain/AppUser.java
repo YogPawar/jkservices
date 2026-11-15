@@ -1,5 +1,6 @@
-package com.jkservice.auth;
+package com.jkservice.auth.domain;
 
+import com.jkservice.family.domain.Family;
 import jakarta.persistence.*;
 
 @Entity

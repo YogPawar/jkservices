@@ -1,4 +1,4 @@
-package com.jkservice.exception;
+package com.jkservice.common.exception;
 
 public enum ApiErrorCode {
   RESOURCE_NOT_FOUND,

@@ -1,7 +1,10 @@
-package com.jkservice.auth;
+package com.jkservice.auth.api;
 
+import com.jkservice.auth.application.RegistrationService;
+import com.jkservice.auth.api.dto.request.CreateFamilyRequest;
+import com.jkservice.auth.api.dto.request.JoinFamilyRequest;
+import com.jkservice.auth.api.dto.response.RegistrationResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,19 +28,4 @@ public class AuthController {
   public RegistrationResponse joinFamily(@Valid @RequestBody JoinFamilyRequest r) {
     return service.joinFamily(r);
   }
-
-  public record CreateFamilyRequest(
-      @NotBlank @Size(max = 120) String familyName,
-      @NotBlank @Size(max = 120) String fullName,
-      @NotBlank @Email String email,
-      @NotBlank @Size(min = 8, max = 100) String password) {}
-
-  public record JoinFamilyRequest(
-      @NotBlank String inviteCode,
-      @NotBlank @Size(max = 120) String fullName,
-      @NotBlank @Email String email,
-      @NotBlank @Size(min = 8, max = 100) String password) {}
-
-  public record RegistrationResponse(
-      Long userId, Long familyId, String role, String membershipStatus, String message) {}
 }

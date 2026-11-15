@@ -1,4 +1,4 @@
-package com.jkservice.exception;
+package com.jkservice.common.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

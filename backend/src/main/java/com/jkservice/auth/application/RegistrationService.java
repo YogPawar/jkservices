@@ -1,10 +1,17 @@
-package com.jkservice.auth;
+package com.jkservice.auth.application;
 
+import com.jkservice.auth.domain.AppUser;
+import com.jkservice.auth.persistence.AppUserRepository;
+import com.jkservice.family.domain.Family;
+import com.jkservice.family.persistence.FamilyRepository;
+import com.jkservice.auth.api.dto.request.CreateFamilyRequest;
+import com.jkservice.auth.api.dto.request.JoinFamilyRequest;
+import com.jkservice.auth.api.dto.response.RegistrationResponse;
+import com.jkservice.common.exception.BusinessException;
+import com.jkservice.common.exception.DuplicateResourceException;
+import jakarta.validation.Valid;
 import java.security.SecureRandom;
 import java.util.Locale;
-
-import com.jkservice.exception.BusinessException;
-import com.jkservice.exception.DuplicateResourceException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +30,7 @@ public class RegistrationService {
   }
 
   @Transactional
-  public AuthController.RegistrationResponse registerFamily(AuthController.CreateFamilyRequest r) {
+  public RegistrationResponse registerFamily(@Valid CreateFamilyRequest r) {
     ensureEmailAvailable(r.email());
     Family f = new Family();
     f.setFamilyName(r.familyName());
@@ -37,7 +44,7 @@ public class RegistrationService {
     u.setRole("OWNER");
     u.setMembershipStatus("ACTIVE");
     u = users.save(u);
-    return new AuthController.RegistrationResponse(
+    return new RegistrationResponse(
         u.getId(),
         f.getId(),
         u.getRole(),
@@ -46,7 +53,7 @@ public class RegistrationService {
   }
 
   @Transactional
-  public AuthController.RegistrationResponse joinFamily(AuthController.JoinFamilyRequest r) {
+  public RegistrationResponse joinFamily(JoinFamilyRequest r) {
     ensureEmailAvailable(r.email());
     Family f =
         families
@@ -60,7 +67,7 @@ public class RegistrationService {
     u.setRole("VIEWER");
     u.setMembershipStatus("PENDING");
     u = users.save(u);
-    return new AuthController.RegistrationResponse(
+    return new RegistrationResponse(
         u.getId(),
         f.getId(),
         u.getRole(),

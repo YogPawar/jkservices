@@ -1,4 +1,4 @@
-package com.jkservice.exception;
+package com.jkservice.common.exception;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;

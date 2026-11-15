@@ -1,4 +1,4 @@
-package com.jkservice.auth;
+package com.jkservice.family.domain;
 
 import jakarta.persistence.*;
 
