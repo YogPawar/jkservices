@@ -1,9 +1,9 @@
 package com.jkservice.auth.application;
 
-import com.jkservice.auth.domain.AppUser;
+import com.jkservice.auth.entity.AppUserEntity;
 import com.jkservice.auth.persistence.AppUserRepository;
-import com.jkservice.family.domain.Family;
-import com.jkservice.family.persistence.FamilyRepository;
+import com.jkservice.family.entity.FamilyEntity;
+import com.jkservice.family.repository.FamilyRepository;
 import com.jkservice.auth.api.dto.request.CreateFamilyRequest;
 import com.jkservice.auth.api.dto.request.JoinFamilyRequest;
 import com.jkservice.auth.api.dto.response.RegistrationResponse;
@@ -32,11 +32,11 @@ public class RegistrationService {
   @Transactional
   public RegistrationResponse registerFamily(@Valid CreateFamilyRequest r) {
     ensureEmailAvailable(r.email());
-    Family f = new Family();
+    FamilyEntity f = new FamilyEntity();
     f.setFamilyName(r.familyName());
     f.setInviteCode(newInviteCode());
     f = families.save(f);
-    AppUser u = new AppUser();
+    AppUserEntity u = new AppUserEntity();
     u.setFamily(f);
     u.setFullName(r.fullName());
     u.setEmail(normalize(r.email()));
@@ -55,11 +55,11 @@ public class RegistrationService {
   @Transactional
   public RegistrationResponse joinFamily(JoinFamilyRequest r) {
     ensureEmailAvailable(r.email());
-    Family f =
+    FamilyEntity f =
         families
             .findByInviteCodeAndActiveTrue(r.inviteCode().trim().toUpperCase(Locale.ROOT))
             .orElseThrow(() -> new BusinessException("Invalid or inactive family invite code"));
-    AppUser u = new AppUser();
+    AppUserEntity u = new AppUserEntity();
     u.setFamily(f);
     u.setFullName(r.fullName());
     u.setEmail(normalize(r.email()));
