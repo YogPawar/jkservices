@@ -1,7 +1,6 @@
 package com.jkservice.farmer.service;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.jkservice.common.exception.BusinessException;
@@ -10,11 +9,13 @@ import com.jkservice.family.entity.FamilyEntity;
 import com.jkservice.family.repository.FamilyRepository;
 import com.jkservice.farmer.dto.CreateFarmerRequest;
 import com.jkservice.farmer.dto.FarmerResponse;
+import com.jkservice.farmer.dto.UpdateFarmerRequest;
 import com.jkservice.farmer.entity.FarmerEntity;
 import com.jkservice.farmer.mapper.FarmerMapper;
 import com.jkservice.farmer.repository.FarmerRepository;
 import com.jkservice.farmer.service.impl.FarmerServiceImpl;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -109,5 +110,142 @@ class FarmerServiceImplTest {
 
     verifyNoInteractions(farmerCodeGenerator);
     verifyNoInteractions(farmerRepository);
+  }
+
+  @Test
+  void shouldReturnFarmersBelongingToFamily() {
+
+    FarmerEntity farmer = new FarmerEntity();
+
+    FarmerResponse expectedResponse =
+        new FarmerResponse(
+            100L,
+            "F-K7M4X9P2Q8RT",
+            "Ramesh",
+            "9876543210",
+            "Pune",
+            "Farm address",
+            true,
+            LocalDateTime.now());
+
+    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+
+    when(farmerRepository.findAllByFamily_Id(10L)).thenReturn(List.of(farmer));
+
+    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
+
+    List<FarmerResponse> result = farmerService.getFarmers(10L);
+
+    assertEquals(1, result.size());
+    assertSame(expectedResponse, result.get(0));
+
+    verify(familyRepository).findById(10L);
+    verify(farmerRepository).findAllByFamily_Id(10L);
+  }
+
+  @Test
+  void shouldReturnEmptyListWhenFamilyHasNoFarmers() {
+
+    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+
+    when(farmerRepository.findAllByFamily_Id(10L)).thenReturn(List.of());
+
+    List<FarmerResponse> result = farmerService.getFarmers(10L);
+
+    assertTrue(result.isEmpty());
+  }
+
+  @Test
+  void shouldRetrieveFarmerWithinOwningFamily() {
+
+    FarmerEntity farmer = new FarmerEntity();
+
+    FarmerResponse expectedResponse =
+        new FarmerResponse(
+            100L,
+            "F-K7M4X9P2Q8RT",
+            "Ramesh",
+            "9876543210",
+            "Pune",
+            "Farm address",
+            true,
+            LocalDateTime.now());
+
+    when(farmerRepository.findByIdAndFamily_Id(100L, 10L)).thenReturn(Optional.of(farmer));
+
+    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
+
+    FarmerResponse result = farmerService.getFarmer(10L, 100L);
+
+    assertSame(expectedResponse, result);
+
+    verify(farmerRepository).findByIdAndFamily_Id(100L, 10L);
+  }
+
+  @Test
+  void shouldUpdateFarmerSuccessfully() {
+
+    FarmerEntity farmer = new FarmerEntity();
+
+    UpdateFarmerRequest updateRequest =
+        new UpdateFarmerRequest("Updated Ramesh", "9999999999", "Nashik", "Updated address", true);
+
+    FarmerResponse expectedResponse =
+        new FarmerResponse(
+            100L,
+            "F-K7M4X9P2Q8RT",
+            "Updated Ramesh",
+            "9999999999",
+            "Nashik",
+            "Updated address",
+            true,
+            LocalDateTime.now());
+
+    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+
+    when(farmerRepository.findByIdAndFamily_Id(100L, 10L)).thenReturn(Optional.of(farmer));
+
+    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
+
+    FarmerResponse result = farmerService.updateFarmer(10L, 100L, updateRequest);
+
+    assertSame(expectedResponse, result);
+
+    verify(farmerMapper).updateEntity(updateRequest, farmer);
+    verify(farmerMapper).toResponse(farmer);
+  }
+
+  @Test
+  void shouldSoftDeactivateFarmerSuccessfully() {
+
+    FarmerEntity farmer = new FarmerEntity();
+    farmer.setActive(true);
+
+    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+
+    when(farmerRepository.findByIdAndFamily_Id(100L, 10L)).thenReturn(Optional.of(farmer));
+
+    farmerService.deactivateFarmer(10L, 100L);
+
+    assertFalse(farmer.isActive());
+  }
+
+  @Test
+  void shouldRejectFarmerUpdateWhenFamilyIsInactive() {
+
+    family.setActive(false);
+
+    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+
+    assertThrows(
+        BusinessException.class,
+        () ->
+            farmerService.updateFarmer(
+                10L,
+                100L,
+                new UpdateFarmerRequest("Ramesh", "9876543210", "Pune", "Address", true)));
+
+    verifyNoInteractions(farmerRepository);
+    verifyNoInteractions(farmerMapper);
   }
 }
