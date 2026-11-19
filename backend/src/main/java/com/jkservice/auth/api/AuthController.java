@@ -1,9 +1,8 @@
 package com.jkservice.auth.api;
 
-import com.jkservice.auth.application.RegistrationService;
-import com.jkservice.auth.api.dto.request.CreateFamilyRequest;
-import com.jkservice.auth.api.dto.request.JoinFamilyRequest;
 import com.jkservice.auth.api.dto.response.RegistrationResponse;
+import com.jkservice.auth.application.RegistrationService;
+import com.jkservice.organization.dto.JoinOrganizationRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +18,13 @@ public class AuthController {
 
   @PostMapping("/register-family")
   @ResponseStatus(HttpStatus.CREATED)
-  public RegistrationResponse registerFamily(@Valid @RequestBody CreateFamilyRequest r) {
-    return service.registerFamily(r);
+  public RegistrationResponse registerFamily(@Valid @RequestBody JoinOrganizationRequest r) {
+    return service.joinOrganization(r);
   }
 
   @PostMapping("/join-family")
   @ResponseStatus(HttpStatus.CREATED)
-  public RegistrationResponse joinFamily(@Valid @RequestBody JoinFamilyRequest r) {
-    return service.joinFamily(r);
+  public RegistrationResponse joinFamily(@Valid @RequestBody JoinOrganizationRequest r) {
+    return service.joinOrganization(r);
   }
 }

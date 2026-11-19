@@ -3,10 +3,13 @@ package com.jkservice.farmer.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.jkservice.business.entity.BusinessEntity;
+import com.jkservice.business.repositroy.BusinessRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.ResourceNotFoundException;
-import com.jkservice.family.entity.FamilyEntity;
-import com.jkservice.family.repository.FamilyRepository;
+import com.jkservice.customer.entity.CustomerEntity;
+import com.jkservice.customer.repository.CustomerRepository;
+import com.jkservice.customer.service.CustomerCodeGenerator;
 import com.jkservice.farmer.dto.CreateFarmerRequest;
 import com.jkservice.farmer.dto.FarmerResponse;
 import com.jkservice.farmer.dto.UpdateFarmerRequest;
@@ -27,100 +30,67 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class FarmerServiceImplTest {
 
+  private static final Long BUSINESS_ID = 10L;
+  private static final Long FARMER_ID = 100L;
+  private static final Long CUSTOMER_ID = 200L;
+
+  @Mock private BusinessRepository businessRepository;
+  @Mock private CustomerRepository customerRepository;
   @Mock private FarmerRepository farmerRepository;
-
-  @Mock private FamilyRepository familyRepository;
-
   @Mock private FarmerMapper farmerMapper;
-
+  @Mock private CustomerCodeGenerator customerCodeGenerator;
   @Mock private FarmerCodeGenerator farmerCodeGenerator;
 
   @InjectMocks private FarmerServiceImpl farmerService;
 
-  private FamilyEntity family;
-  private CreateFarmerRequest request;
+  private BusinessEntity business;
+  private CustomerEntity customer;
+  private FarmerEntity farmer;
+  private CreateFarmerRequest createRequest;
 
   @BeforeEach
   void setUp() {
-    family = new FamilyEntity();
-    family.setId(10L);
-    family.setFamilyName("Pawar Family");
-    family.setInviteCode("INVITE-001");
-    family.setActive(true);
+    business = new BusinessEntity();
+    business.setId(BUSINESS_ID);
+    business.setBusinessName("Pawar Farming");
+    business.setBusinessType("FARMING_SERVICES");
+    business.setActive(true);
 
-    request = new CreateFarmerRequest("Ramesh", "9876543210", "Pune", "Farm address", true);
+    customer = new CustomerEntity();
+    customer.setId(CUSTOMER_ID);
+    customer.setBusinessId(BUSINESS_ID);
+    customer.setCustomerCode("C-ABC123");
+    customer.setName("Ramesh");
+    customer.setPhone("9876543210");
+    customer.setAddress("Farm address");
+    customer.setActive(true);
+
+    farmer = new FarmerEntity();
+    farmer.setId(FARMER_ID);
+    farmer.setBusinessId(BUSINESS_ID);
+    farmer.setCustomerId(CUSTOMER_ID);
+    farmer.setFarmerCode("F-ABC123");
+    farmer.setVillage("Pune");
+
+    createRequest = new CreateFarmerRequest("Ramesh", "9876543210", "Pune", "Farm address", true);
   }
 
   @Test
-  void shouldCreateFarmerSuccessfully() {
-
-    String farmerCode = "F-K7M4X9P2Q8RT";
-    FarmerEntity farmer = new FarmerEntity();
-
-    FarmerResponse expectedResponse =
-        new FarmerResponse(
-            100L,
-            farmerCode,
-            "Ramesh",
-            "9876543210",
-            "Pune",
-            "Farm address",
-            true,
-            LocalDateTime.now());
-
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
-
-    when(farmerCodeGenerator.generate()).thenReturn(farmerCode);
-
-    when(farmerMapper.toEntity(request, family, farmerCode)).thenReturn(farmer);
-
+  void shouldCreateFarmerAndCustomerSuccessfully() {
+    when(businessRepository.findByIdAndActiveTrue(BUSINESS_ID)).thenReturn(Optional.of(business));
+    when(customerCodeGenerator.generate()).thenReturn("C-ABC123");
+    when(farmerCodeGenerator.generate()).thenReturn("F-ABC123");
+    when(farmerMapper.toCustomerEntity(createRequest, BUSINESS_ID, "C-ABC123"))
+        .thenReturn(customer);
+    when(customerRepository.save(customer)).thenReturn(customer);
+    when(farmerMapper.toFarmerEntity(createRequest, BUSINESS_ID, CUSTOMER_ID, "F-ABC123"))
+        .thenReturn(farmer);
     when(farmerRepository.save(farmer)).thenReturn(farmer);
 
-    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
-
-    FarmerResponse actualResponse = farmerService.createFarmer(10L, request);
-
-    assertSame(expectedResponse, actualResponse);
-
-    verify(familyRepository).findById(10L);
-    verify(farmerCodeGenerator).generate();
-    verify(farmerRepository).save(farmer);
-    verify(farmerMapper).toResponse(farmer);
-  }
-
-  @Test
-  void shouldThrowExceptionWhenFamilyDoesNotExist() {
-
-    when(familyRepository.findById(10L)).thenReturn(Optional.empty());
-
-    assertThrows(ResourceNotFoundException.class, () -> farmerService.createFarmer(10L, request));
-
-    verifyNoInteractions(farmerCodeGenerator);
-    verifyNoInteractions(farmerRepository);
-  }
-
-  @Test
-  void shouldRejectFarmerCreationForInactiveFamily() {
-
-    family.setActive(false);
-
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
-
-    assertThrows(BusinessException.class, () -> farmerService.createFarmer(10L, request));
-
-    verifyNoInteractions(farmerCodeGenerator);
-    verifyNoInteractions(farmerRepository);
-  }
-
-  @Test
-  void shouldReturnFarmersBelongingToFamily() {
-
-    FarmerEntity farmer = new FarmerEntity();
-
-    FarmerResponse expectedResponse =
+    FarmerResponse expected =
         new FarmerResponse(
-            100L,
-            "F-K7M4X9P2Q8RT",
+            FARMER_ID,
+            "F-ABC123",
             "Ramesh",
             "9876543210",
             "Pune",
@@ -128,42 +98,101 @@ class FarmerServiceImplTest {
             true,
             LocalDateTime.now());
 
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+    when(farmerMapper.toResponse(farmer, customer)).thenReturn(expected);
 
-    when(farmerRepository.findAllByFamily_Id(10L)).thenReturn(List.of(farmer));
+    FarmerResponse result = farmerService.createFarmer(BUSINESS_ID, createRequest);
 
-    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
+    assertSame(expected, result);
 
-    List<FarmerResponse> result = farmerService.getFarmers(10L);
+    verify(customerRepository).save(customer);
+    verify(farmerRepository).save(farmer);
+    verify(farmerMapper).toFarmerEntity(createRequest, BUSINESS_ID, CUSTOMER_ID, "F-ABC123");
+  }
+
+  @Test
+  void shouldRejectCreationWhenBusinessDoesNotExistOrIsInactive() {
+    when(businessRepository.findByIdAndActiveTrue(BUSINESS_ID)).thenReturn(Optional.empty());
+
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> farmerService.createFarmer(BUSINESS_ID, createRequest));
+
+    verifyNoInteractions(
+        customerRepository,
+        farmerRepository,
+        customerCodeGenerator,
+        farmerCodeGenerator,
+        farmerMapper);
+  }
+
+  @Test
+  void shouldRejectCreationForNonFarmingBusiness() {
+    business.setBusinessType("EVENT_MANAGEMENT");
+
+    when(businessRepository.findByIdAndActiveTrue(BUSINESS_ID)).thenReturn(Optional.of(business));
+
+    assertThrows(
+        BusinessException.class, () -> farmerService.createFarmer(BUSINESS_ID, createRequest));
+
+    verifyNoInteractions(
+        customerRepository,
+        farmerRepository,
+        customerCodeGenerator,
+        farmerCodeGenerator,
+        farmerMapper);
+  }
+
+  @Test
+  void shouldReturnFarmersBelongingToBusiness() {
+    when(businessRepository.findById(BUSINESS_ID)).thenReturn(Optional.of(business));
+    when(farmerRepository.findAllByBusinessId(BUSINESS_ID)).thenReturn(List.of(farmer));
+    when(customerRepository.findByIdAndBusinessId(CUSTOMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(customer));
+
+    FarmerResponse expected =
+        new FarmerResponse(
+            FARMER_ID,
+            "F-ABC123",
+            "Ramesh",
+            "9876543210",
+            "Pune",
+            "Farm address",
+            true,
+            LocalDateTime.now());
+
+    when(farmerMapper.toResponse(farmer, customer)).thenReturn(expected);
+
+    List<FarmerResponse> result = farmerService.getFarmers(BUSINESS_ID);
 
     assertEquals(1, result.size());
-    assertSame(expectedResponse, result.get(0));
+    assertSame(expected, result.get(0));
 
-    verify(familyRepository).findById(10L);
-    verify(farmerRepository).findAllByFamily_Id(10L);
+    verify(farmerRepository).findAllByBusinessId(BUSINESS_ID);
+    verify(customerRepository).findByIdAndBusinessId(CUSTOMER_ID, BUSINESS_ID);
   }
 
   @Test
-  void shouldReturnEmptyListWhenFamilyHasNoFarmers() {
+  void shouldReturnEmptyListWhenBusinessHasNoFarmers() {
+    when(businessRepository.findById(BUSINESS_ID)).thenReturn(Optional.of(business));
+    when(farmerRepository.findAllByBusinessId(BUSINESS_ID)).thenReturn(List.of());
 
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
-
-    when(farmerRepository.findAllByFamily_Id(10L)).thenReturn(List.of());
-
-    List<FarmerResponse> result = farmerService.getFarmers(10L);
+    List<FarmerResponse> result = farmerService.getFarmers(BUSINESS_ID);
 
     assertTrue(result.isEmpty());
+    verifyNoInteractions(customerRepository);
   }
 
   @Test
-  void shouldRetrieveFarmerWithinOwningFamily() {
+  void shouldRetrieveFarmerWithinOwningBusiness() {
+    when(farmerRepository.findByIdAndBusinessId(FARMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(farmer));
+    when(customerRepository.findByIdAndBusinessId(CUSTOMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(customer));
 
-    FarmerEntity farmer = new FarmerEntity();
-
-    FarmerResponse expectedResponse =
+    FarmerResponse expected =
         new FarmerResponse(
-            100L,
-            "F-K7M4X9P2Q8RT",
+            FARMER_ID,
+            "F-ABC123",
             "Ramesh",
             "9876543210",
             "Pune",
@@ -171,29 +200,41 @@ class FarmerServiceImplTest {
             true,
             LocalDateTime.now());
 
-    when(farmerRepository.findByIdAndFamily_Id(100L, 10L)).thenReturn(Optional.of(farmer));
+    when(farmerMapper.toResponse(farmer, customer)).thenReturn(expected);
 
-    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
+    FarmerResponse result = farmerService.getFarmer(BUSINESS_ID, FARMER_ID);
 
-    FarmerResponse result = farmerService.getFarmer(10L, 100L);
-
-    assertSame(expectedResponse, result);
-
-    verify(farmerRepository).findByIdAndFamily_Id(100L, 10L);
+    assertSame(expected, result);
+    verify(farmerRepository).findByIdAndBusinessId(FARMER_ID, BUSINESS_ID);
+    verify(customerRepository).findByIdAndBusinessId(CUSTOMER_ID, BUSINESS_ID);
   }
 
   @Test
-  void shouldUpdateFarmerSuccessfully() {
+  void shouldNotRetrieveFarmerFromAnotherBusiness() {
+    when(farmerRepository.findByIdAndBusinessId(FARMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.empty());
 
-    FarmerEntity farmer = new FarmerEntity();
+    assertThrows(
+        ResourceNotFoundException.class, () -> farmerService.getFarmer(BUSINESS_ID, FARMER_ID));
 
-    UpdateFarmerRequest updateRequest =
+    verifyNoInteractions(customerRepository, farmerMapper);
+  }
+
+  @Test
+  void shouldUpdateCustomerAndFarmerSuccessfully() {
+    UpdateFarmerRequest request =
         new UpdateFarmerRequest("Updated Ramesh", "9999999999", "Nashik", "Updated address", true);
 
-    FarmerResponse expectedResponse =
+    when(businessRepository.findByIdAndActiveTrue(BUSINESS_ID)).thenReturn(Optional.of(business));
+    when(farmerRepository.findByIdAndBusinessId(FARMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(farmer));
+    when(customerRepository.findByIdAndBusinessId(CUSTOMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(customer));
+
+    FarmerResponse expected =
         new FarmerResponse(
-            100L,
-            "F-K7M4X9P2Q8RT",
+            FARMER_ID,
+            "F-ABC123",
             "Updated Ramesh",
             "9999999999",
             "Nashik",
@@ -201,51 +242,39 @@ class FarmerServiceImplTest {
             true,
             LocalDateTime.now());
 
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+    when(farmerMapper.toResponse(farmer, customer)).thenReturn(expected);
 
-    when(farmerRepository.findByIdAndFamily_Id(100L, 10L)).thenReturn(Optional.of(farmer));
+    FarmerResponse result = farmerService.updateFarmer(BUSINESS_ID, FARMER_ID, request);
 
-    when(farmerMapper.toResponse(farmer)).thenReturn(expectedResponse);
-
-    FarmerResponse result = farmerService.updateFarmer(10L, 100L, updateRequest);
-
-    assertSame(expectedResponse, result);
-
-    verify(farmerMapper).updateEntity(updateRequest, farmer);
-    verify(farmerMapper).toResponse(farmer);
+    assertSame(expected, result);
+    verify(farmerMapper).updateCustomerEntity(request, customer);
+    verify(farmerMapper).updateFarmerEntity(request, farmer);
   }
 
   @Test
-  void shouldSoftDeactivateFarmerSuccessfully() {
+  void shouldSoftDeactivateCustomerSuccessfully() {
+    when(businessRepository.findByIdAndActiveTrue(BUSINESS_ID)).thenReturn(Optional.of(business));
+    when(farmerRepository.findByIdAndBusinessId(FARMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(farmer));
+    when(customerRepository.findByIdAndBusinessId(CUSTOMER_ID, BUSINESS_ID))
+        .thenReturn(Optional.of(customer));
 
-    FarmerEntity farmer = new FarmerEntity();
-    farmer.setActive(true);
+    farmerService.deactivateFarmer(BUSINESS_ID, FARMER_ID);
 
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
-
-    when(farmerRepository.findByIdAndFamily_Id(100L, 10L)).thenReturn(Optional.of(farmer));
-
-    farmerService.deactivateFarmer(10L, 100L);
-
-    assertFalse(farmer.isActive());
+    assertFalse(customer.isActive());
   }
 
   @Test
-  void shouldRejectFarmerUpdateWhenFamilyIsInactive() {
+  void shouldRejectUpdateWhenBusinessIsInactive() {
+    when(businessRepository.findByIdAndActiveTrue(BUSINESS_ID)).thenReturn(Optional.empty());
 
-    family.setActive(false);
-
-    when(familyRepository.findById(10L)).thenReturn(Optional.of(family));
+    UpdateFarmerRequest request =
+        new UpdateFarmerRequest("Ramesh", "9876543210", "Pune", "Address", true);
 
     assertThrows(
-        BusinessException.class,
-        () ->
-            farmerService.updateFarmer(
-                10L,
-                100L,
-                new UpdateFarmerRequest("Ramesh", "9876543210", "Pune", "Address", true)));
+        ResourceNotFoundException.class,
+        () -> farmerService.updateFarmer(BUSINESS_ID, FARMER_ID, request));
 
-    verifyNoInteractions(farmerRepository);
-    verifyNoInteractions(farmerMapper);
+    verifyNoInteractions(farmerRepository, customerRepository, farmerMapper);
   }
 }

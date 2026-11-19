@@ -1,7 +1,11 @@
 package com.jkservice.family.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "families")
 public class Family {
@@ -16,28 +20,4 @@ public class Family {
   private String inviteCode;
 
   private boolean active = true;
-
-  public Long getId() {
-    return id;
-  }
-
-  public String getFamilyName() {
-    return familyName;
-  }
-
-  public void setFamilyName(String v) {
-    familyName = v;
-  }
-
-  public String getInviteCode() {
-    return inviteCode;
-  }
-
-  public void setInviteCode(String v) {
-    inviteCode = v;
-  }
-
-  public boolean isActive() {
-    return active;
-  }
 }

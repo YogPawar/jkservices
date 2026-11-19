@@ -1,9 +1,12 @@
 package com.jkservice.farmer.service.impl;
 
+import com.jkservice.business.entity.BusinessEntity;
+import com.jkservice.business.repositroy.BusinessRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.ResourceNotFoundException;
-import com.jkservice.family.entity.FamilyEntity;
-import com.jkservice.family.repository.FamilyRepository;
+import com.jkservice.customer.entity.CustomerEntity;
+import com.jkservice.customer.repository.CustomerRepository;
+import com.jkservice.customer.service.CustomerCodeGenerator;
 import com.jkservice.farmer.dto.CreateFarmerRequest;
 import com.jkservice.farmer.dto.FarmerResponse;
 import com.jkservice.farmer.dto.UpdateFarmerRequest;
@@ -22,92 +25,122 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class FarmerServiceImpl implements FarmerService {
 
+  private static final String FARMING_SERVICES = "FARMING_SERVICES";
+
+  private final BusinessRepository businessRepository;
+  private final CustomerRepository customerRepository;
   private final FarmerRepository farmerRepository;
-  private final FamilyRepository familyRepository;
   private final FarmerMapper farmerMapper;
+  private final CustomerCodeGenerator customerCodeGenerator;
   private final FarmerCodeGenerator farmerCodeGenerator;
 
   @Override
-  public FarmerResponse createFarmer(Long familyId, CreateFarmerRequest request) {
+  public FarmerResponse createFarmer(Long businessId, CreateFarmerRequest request) {
+    getActiveFarmingBusiness(businessId);
 
-    FamilyEntity family = getActiveFamily(familyId);
-
+    String customerCode = customerCodeGenerator.generate();
     String farmerCode = farmerCodeGenerator.generate();
 
-    FarmerEntity farmer = farmerMapper.toEntity(request, family, farmerCode);
+    CustomerEntity customer = farmerMapper.toCustomerEntity(request, businessId, customerCode);
+
+    CustomerEntity savedCustomer = customerRepository.save(customer);
+
+    FarmerEntity farmer =
+        farmerMapper.toFarmerEntity(request, businessId, savedCustomer.getId(), farmerCode);
 
     FarmerEntity savedFarmer = farmerRepository.save(farmer);
 
-    return farmerMapper.toResponse(savedFarmer);
+    return farmerMapper.toResponse(savedFarmer, savedCustomer);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<FarmerResponse> getFarmers(Long familyId) {
+  public List<FarmerResponse> getFarmers(Long businessId) {
+    getFarmingBusiness(businessId);
 
-    getFamily(familyId);
-
-    return farmerRepository.findAllByFamily_Id(familyId).stream()
-        .map(farmerMapper::toResponse)
+    return farmerRepository.findAllByBusinessId(businessId).stream()
+        .map(farmer -> {
+          CustomerEntity customer = getCustomer(businessId, farmer.getCustomerId());
+          return farmerMapper.toResponse(farmer, customer);
+        })
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public FarmerResponse getFarmer(Long familyId, Long farmerId) {
+  public FarmerResponse getFarmer(Long businessId, Long farmerId) {
+    FarmerEntity farmer = getFarmerEntity(businessId, farmerId);
+    CustomerEntity customer = getCustomer(businessId, farmer.getCustomerId());
 
-    FarmerEntity farmer = getFarmerEntity(familyId, farmerId);
-
-    return farmerMapper.toResponse(farmer);
+    return farmerMapper.toResponse(farmer, customer);
   }
 
   @Override
-  public FarmerResponse updateFarmer(Long familyId, Long farmerId, UpdateFarmerRequest request) {
+  public FarmerResponse updateFarmer(Long businessId, Long farmerId, UpdateFarmerRequest request) {
 
-    getActiveFamily(familyId);
+    getActiveFarmingBusiness(businessId);
 
-    FarmerEntity farmer = getFarmerEntity(familyId, farmerId);
+    FarmerEntity farmer = getFarmerEntity(businessId, farmerId);
+    CustomerEntity customer = getCustomer(businessId, farmer.getCustomerId());
 
-    farmerMapper.updateEntity(request, farmer);
+    farmerMapper.updateCustomerEntity(request, customer);
+    farmerMapper.updateFarmerEntity(request, farmer);
 
-    return farmerMapper.toResponse(farmer);
+    return farmerMapper.toResponse(farmer, customer);
   }
 
   @Override
-  public void deactivateFarmer(Long familyId, Long farmerId) {
+  public void deactivateFarmer(Long businessId, Long farmerId) {
+    getActiveFarmingBusiness(businessId);
 
-    getActiveFamily(familyId);
+    FarmerEntity farmer = getFarmerEntity(businessId, farmerId);
+    CustomerEntity customer = getCustomer(businessId, farmer.getCustomerId());
 
-    FarmerEntity farmer = getFarmerEntity(familyId, farmerId);
-
-    // Idempotent soft deletion.
-    farmer.setActive(false);
+    // Idempotent soft deactivation of the customer record.
+    customer.setActive(false);
   }
 
-  private FamilyEntity getFamily(Long familyId) {
+  private BusinessEntity getFarmingBusiness(Long businessId) {
+    BusinessEntity business =
+        businessRepository
+            .findById(businessId)
+            .orElseThrow(
+                () -> new ResourceNotFoundException("Business not found with ID: " + businessId));
 
-    return familyRepository
-        .findById(familyId)
-        .orElseThrow(() -> new ResourceNotFoundException("Family not found with ID: " + familyId));
-  }
-
-  private FamilyEntity getActiveFamily(Long familyId) {
-
-    FamilyEntity family = getFamily(familyId);
-
-    if (!family.isActive()) {
-      throw new BusinessException("Cannot modify farmers under an inactive family");
+    if (!FARMING_SERVICES.equals(business.getBusinessType())) {
+      throw new BusinessException("Farmer operations are only supported for farming businesses");
     }
 
-    return family;
+    return business;
   }
 
-  private FarmerEntity getFarmerEntity(Long familyId, Long farmerId) {
+  private BusinessEntity getActiveFarmingBusiness(Long businessId) {
+    BusinessEntity business =
+        businessRepository
+            .findByIdAndActiveTrue(businessId)
+            .orElseThrow(() ->
+                new ResourceNotFoundException("Active business not found with ID: " + businessId));
 
+    if (!FARMING_SERVICES.equals(business.getBusinessType())) {
+      throw new BusinessException("Farmer operations are only supported for farming businesses");
+    }
+
+    return business;
+  }
+
+  private FarmerEntity getFarmerEntity(Long businessId, Long farmerId) {
     return farmerRepository
-        .findByIdAndFamily_Id(farmerId, familyId)
+        .findByIdAndBusinessId(farmerId, businessId)
         .orElseThrow(() ->
             new ResourceNotFoundException(
-                "Farmer not found with ID: " + farmerId + " in family: " + familyId));
+                "Farmer not found with ID: " + farmerId + " in business: " + businessId));
+  }
+
+  private CustomerEntity getCustomer(Long businessId, Long customerId) {
+    return customerRepository
+        .findByIdAndBusinessId(customerId, businessId)
+        .orElseThrow(() ->
+            new ResourceNotFoundException(
+                "Customer not found with ID: " + customerId + " in business: " + businessId));
   }
 }

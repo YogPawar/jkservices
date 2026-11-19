@@ -1,9 +1,8 @@
 package com.jkservice.invoice.entity;
 
-import com.jkservice.family.entity.FamilyEntity;
-import com.jkservice.work.domain.WorkEntryEntity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,35 +13,51 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "invoice_items",
-    uniqueConstraints = {
-      @UniqueConstraint(
-          name = "uq_invoice_work",
-          columnNames = {"invoice_id", "work_entry_id"}),
-      @UniqueConstraint(
-          name = "uq_work_billed",
-          columnNames = {"work_entry_id"})
+    indexes = {
+      @Index(
+          name = "idx_invoice_items_invoice",
+          columnList = "invoice_id, business_id, customer_id"),
+      @Index(
+          name = "idx_invoice_items_work",
+          columnList = "work_entry_id, business_id, customer_id"),
+      @Index(
+          name = "idx_invoice_items_booking",
+          columnList = "event_booking_id, business_id, customer_id")
     })
 public class InvoiceItemEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "family_id", nullable = false)
-  private FamilyEntity family;
+  @Column(name = "business_id", nullable = false)
+  private Long businessId;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "invoice_id", nullable = false)
-  private InvoiceEntity invoice;
+  @Column(name = "customer_id", nullable = false)
+  private Long customerId;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "work_entry_id", nullable = false)
-  private WorkEntryEntity workEntry;
+  @Column(name = "invoice_id", nullable = false)
+  private Long invoiceId;
 
-  @Column(name = "description", length = 255)
+  @Column(name = "work_entry_id")
+  private Long workEntryId;
+
+  @Column(name = "event_booking_id")
+  private Long eventBookingId;
+
+  @Column(name = "description", length = 500, nullable = false)
   private String description;
 
-  @Column(name = "amount", nullable = false, precision = 12, scale = 2)
+  @Column(name = "quantity", precision = 12, scale = 3, nullable = false)
+  private BigDecimal quantity;
+
+  @Column(name = "unit_price", precision = 14, scale = 2, nullable = false)
+  private BigDecimal unitPrice;
+
+  @Column(name = "amount", precision = 14, scale = 2, nullable = false)
   private BigDecimal amount;
+
+  @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+  private LocalDateTime createdAt;
 }

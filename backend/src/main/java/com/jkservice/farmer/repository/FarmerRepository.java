@@ -6,9 +6,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FarmerRepository extends JpaRepository<FarmerEntity, Long> {
-  Optional<FarmerEntity> findByIdAndFamily_Id(Long farmerId, Long familyId);
 
-  List<FarmerEntity> findAllByFamily_Id(Long familyId);
+  Optional<FarmerEntity> findByIdAndBusinessId(Long farmerId, Long businessId);
 
-  boolean existsByFamily_IdAndFarmerCode(Long familyId, String farmerCode);
+  List<FarmerEntity> findAllByBusinessId(Long businessId);
+
+  boolean existsByBusinessIdAndFarmerCode(Long businessId, String farmerCode);
+
+  boolean existsByBusinessIdAndCustomerId(Long businessId, Long customerId);
 }

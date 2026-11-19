@@ -7,13 +7,14 @@ import java.util.List;
 
 public interface FarmerService {
 
-  FarmerResponse createFarmer(Long familyId, CreateFarmerRequest request);
+  FarmerResponse createFarmer(Long businessId, CreateFarmerRequest request);
 
-  List<FarmerResponse> getFarmers(Long familyId);
+  List<FarmerResponse> getFarmers(Long businessId);
 
-  FarmerResponse getFarmer(Long familyId, Long farmerId);
+  FarmerResponse getFarmer(Long businessId, Long farmerId);
 
-  FarmerResponse updateFarmer(Long familyId, Long farmerId, UpdateFarmerRequest request);
+  FarmerResponse updateFarmer(
+          Long businessId, Long farmerId, UpdateFarmerRequest request);
 
-  void deactivateFarmer(Long familyId, Long farmerId);
+  void deactivateFarmer(Long businessId, Long farmerId);
 }

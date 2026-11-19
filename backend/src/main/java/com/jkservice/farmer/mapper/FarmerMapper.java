@@ -1,6 +1,7 @@
+
 package com.jkservice.farmer.mapper;
 
-import com.jkservice.family.entity.FamilyEntity;
+import com.jkservice.customer.entity.CustomerEntity;
 import com.jkservice.farmer.dto.CreateFarmerRequest;
 import com.jkservice.farmer.dto.FarmerResponse;
 import com.jkservice.farmer.dto.UpdateFarmerRequest;
@@ -10,42 +11,61 @@ import org.springframework.stereotype.Component;
 @Component
 public class FarmerMapper {
 
-  public FarmerEntity toEntity(
-      CreateFarmerRequest request, FamilyEntity family, String farmerCode) {
+  public CustomerEntity toCustomerEntity(
+          CreateFarmerRequest request, Long businessId, String customerCode) {
+
+    CustomerEntity customer = new CustomerEntity();
+
+    customer.setBusinessId(businessId);
+    customer.setCustomerCode(customerCode);
+    customer.setName(request.name().trim());
+    customer.setPhone(normalizeOptional(request.phone()));
+    customer.setAddress(normalizeOptional(request.address()));
+    customer.setActive(request.active());
+
+    return customer;
+  }
+
+  public FarmerEntity toFarmerEntity(
+          CreateFarmerRequest request,
+          Long businessId,
+          Long customerId,
+          String farmerCode) {
 
     FarmerEntity farmer = new FarmerEntity();
 
-    farmer.setFamily(family);
+    farmer.setBusinessId(businessId);
+    farmer.setCustomerId(customerId);
     farmer.setFarmerCode(farmerCode);
-    farmer.setName(request.name().trim());
-    farmer.setPhone(normalizeOptional(request.phone()));
     farmer.setVillage(normalizeOptional(request.village()));
-    farmer.setAddress(normalizeOptional(request.address()));
-    farmer.setActive(request.active());
 
     return farmer;
   }
 
-  public void updateEntity(UpdateFarmerRequest request, FarmerEntity farmer) {
+  public void updateCustomerEntity(UpdateFarmerRequest request, CustomerEntity customer) {
 
-    farmer.setName(request.name().trim());
-    farmer.setPhone(normalizeOptional(request.phone()));
-    farmer.setVillage(normalizeOptional(request.village()));
-    farmer.setAddress(normalizeOptional(request.address()));
-    farmer.setActive(request.active());
+    customer.setName(request.name().trim());
+    customer.setPhone(normalizeOptional(request.phone()));
+    customer.setAddress(normalizeOptional(request.address()));
+    customer.setActive(request.active());
   }
 
-  public FarmerResponse toResponse(FarmerEntity farmer) {
+  public void updateFarmerEntity(UpdateFarmerRequest request, FarmerEntity farmer) {
+
+    farmer.setVillage(normalizeOptional(request.village()));
+  }
+
+  public FarmerResponse toResponse(FarmerEntity farmer, CustomerEntity customer) {
 
     return new FarmerResponse(
-        farmer.getId(),
-        farmer.getFarmerCode(),
-        farmer.getName(),
-        farmer.getPhone(),
-        farmer.getVillage(),
-        farmer.getAddress(),
-        farmer.isActive(),
-        farmer.getCreatedAt());
+            farmer.getId(),
+            farmer.getFarmerCode(),
+            customer.getName(),
+            customer.getPhone(),
+            farmer.getVillage(),
+            customer.getAddress(),
+            customer.isActive(),
+            farmer.getCreatedAt());
   }
 
   private String normalizeOptional(String value) {

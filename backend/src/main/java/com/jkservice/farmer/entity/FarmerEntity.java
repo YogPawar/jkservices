@@ -1,9 +1,7 @@
 package com.jkservice.farmer.entity;
 
-import com.jkservice.family.entity.FamilyEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,42 +14,40 @@ import lombok.Setter;
     name = "farmers",
     uniqueConstraints = {
       @UniqueConstraint(
-          name = "uq_farmer_code_family",
-          columnNames = {"family_id", "farmer_code"})
+          name = "uk_farmer_customer",
+          columnNames = {"customer_id"}),
+      @UniqueConstraint(
+          name = "uk_farmer_code",
+          columnNames = {"business_id", "farmer_code"}),
+      @UniqueConstraint(
+          name = "uk_farmer_id_business_customer",
+          columnNames = {"id", "business_id", "customer_id"})
     },
-    indexes = {@Index(name = "idx_farmers_family_name", columnList = "family_id, name")})
+    indexes = {
+      @Index(name = "idx_farmers_customer_business", columnList = "customer_id, business_id")
+    })
 public class FarmerEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "family_id", nullable = false)
-  private FamilyEntity family;
+  @Column(name = "business_id", nullable = false)
+  private Long businessId;
 
-  @Column(name = "farmer_code", nullable = false, length = 30)
+  @Column(name = "customer_id", nullable = false)
+  private Long customerId;
+
+  @Column(name = "farmer_code", length = 50, nullable = false)
   private String farmerCode;
 
-  @Column(name = "name", nullable = false, length = 150)
-  private String name;
-
-  @Column(name = "phone", length = 20)
-  private String phone;
-
-  @Column(name = "village", length = 100)
+  @Column(name = "village", length = 120)
   private String village;
 
-  @Column(name = "address", columnDefinition = "TEXT")
-  private String address;
-
-  @Column(name = "active", nullable = false)
-  private boolean active = true;
-
-  @Setter(AccessLevel.NONE)
-  @Column(name = "created_at", insertable = false, updatable = false)
+  @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
   private LocalDateTime createdAt;
 
-  @Column(name = "updated_at", insertable = false, updatable = false)
+  @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
   private LocalDateTime updatedAt;
 }

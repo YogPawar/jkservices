@@ -1,15 +1,10 @@
 package com.jkservice.logging.audit.entity;
 
-import com.jkservice.auth.entity.AppUserEntity;
-import com.jkservice.family.entity.FamilyEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -17,34 +12,41 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(
     name = "audit_logs",
-    indexes = {@Index(name = "idx_audit_family_time", columnList = "family_id, created_at")})
+    indexes = {
+      @Index(name = "idx_audit_org_time", columnList = "organization_id, created_at"),
+      @Index(name = "idx_audit_business_time", columnList = "business_id, created_at"),
+      @Index(name = "idx_audit_business_org", columnList = "business_id, organization_id"),
+      @Index(name = "idx_audit_entity", columnList = "entity_type, entity_id"),
+      @Index(name = "idx_audit_actor_time", columnList = "actor_user_id, created_at")
+    })
 public class AuditLogEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY, optional = false)
-  @JoinColumn(name = "family_id", nullable = false)
-  private FamilyEntity family;
+  @Column(name = "organization_id", nullable = false)
+  private Long organizationId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "actor_user_id")
-  private AppUserEntity actorUser;
+  @Column(name = "business_id")
+  private Long businessId;
 
-  @Column(name = "action", nullable = false, length = 40)
+  @Column(name = "actor_user_id")
+  private Long actorUserId;
+
+  @Column(name = "action", length = 100, nullable = false)
   private String action;
 
-  @Column(name = "entity_type", nullable = false, length = 60)
+  @Column(name = "entity_type", length = 100, nullable = false)
   private String entityType;
 
-  @Column(name = "entity_id")
-  private Long entityId;
+  @Column(name = "entity_id", length = 100)
+  private String entityId;
 
-  @JdbcTypeCode(SqlTypes.JSON)
   @Column(name = "details", columnDefinition = "json")
-  private Map<String, Object> details;
+  private String details;
 
-  @Column(name = "created_at", insertable = false, updatable = false)
+  @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
   private LocalDateTime createdAt;
 }

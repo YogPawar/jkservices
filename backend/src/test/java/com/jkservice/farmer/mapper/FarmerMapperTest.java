@@ -2,7 +2,7 @@ package com.jkservice.farmer.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.jkservice.family.entity.FamilyEntity;
+import com.jkservice.customer.entity.CustomerEntity;
 import com.jkservice.farmer.dto.CreateFarmerRequest;
 import com.jkservice.farmer.dto.FarmerResponse;
 import com.jkservice.farmer.dto.UpdateFarmerRequest;
@@ -13,36 +13,39 @@ import org.junit.jupiter.api.Test;
 class FarmerMapperTest {
 
   private FarmerMapper farmerMapper;
-  private FamilyEntity family;
+
+  private static final Long BUSINESS_ID = 10L;
+  private static final Long CUSTOMER_ID = 20L;
 
   @BeforeEach
   void setUp() {
     farmerMapper = new FarmerMapper();
-
-    family = new FamilyEntity();
-    family.setId(1L);
-    family.setFamilyName("Pawar Family");
-    family.setActive(true);
   }
 
   @Test
-  void shouldMapCreateRequestToFarmerEntity() {
+  void shouldMapCreateRequestToCustomerAndFarmerEntities() {
 
     CreateFarmerRequest request =
         new CreateFarmerRequest(
             "  Yogesh Pawar  ", " 9876543210 ", "  Pune  ", "  Maharashtra  ", true);
 
-    FarmerEntity farmer = farmerMapper.toEntity(request, family, "FAM001");
+    CustomerEntity customer = farmerMapper.toCustomerEntity(request, BUSINESS_ID, "C-001");
+
+    FarmerEntity farmer = farmerMapper.toFarmerEntity(request, BUSINESS_ID, CUSTOMER_ID, "F-001");
 
     assertAll(
+        () -> assertNull(customer.getId()),
+        () -> assertEquals(BUSINESS_ID, customer.getBusinessId()),
+        () -> assertEquals("C-001", customer.getCustomerCode()),
+        () -> assertEquals("Yogesh Pawar", customer.getName()),
+        () -> assertEquals("9876543210", customer.getPhone()),
+        () -> assertEquals("Maharashtra", customer.getAddress()),
+        () -> assertTrue(customer.isActive()),
         () -> assertNull(farmer.getId()),
-        () -> assertSame(family, farmer.getFamily()),
-        () -> assertEquals("FAM001", farmer.getFarmerCode()),
-        () -> assertEquals("Yogesh Pawar", farmer.getName()),
-        () -> assertEquals("9876543210", farmer.getPhone()),
-        () -> assertEquals("Pune", farmer.getVillage()),
-        () -> assertEquals("Maharashtra", farmer.getAddress()),
-        () -> assertTrue(farmer.isActive()));
+        () -> assertEquals(BUSINESS_ID, farmer.getBusinessId()),
+        () -> assertEquals(CUSTOMER_ID, farmer.getCustomerId()),
+        () -> assertEquals("F-001", farmer.getFarmerCode()),
+        () -> assertEquals("Pune", farmer.getVillage()));
   }
 
   @Test
@@ -50,77 +53,93 @@ class FarmerMapperTest {
 
     CreateFarmerRequest request = new CreateFarmerRequest("Yogesh Pawar", null, "   ", null, true);
 
-    FarmerEntity farmer = farmerMapper.toEntity(request, family, "FAM002");
+    CustomerEntity customer = farmerMapper.toCustomerEntity(request, BUSINESS_ID, "C-002");
+
+    FarmerEntity farmer = farmerMapper.toFarmerEntity(request, BUSINESS_ID, CUSTOMER_ID, "F-002");
 
     assertAll(
-        () -> assertNull(farmer.getPhone()),
-        () -> assertNull(farmer.getVillage()),
-        () -> assertNull(farmer.getAddress()));
+        () -> assertNull(customer.getPhone()),
+        () -> assertNull(customer.getAddress()),
+        () -> assertNull(farmer.getVillage()));
   }
 
   @Test
-  void shouldMapUpdateRequestToExistingFarmerEntity() {
+  void shouldUpdateCustomerAndFarmerEntities() {
+
+    CustomerEntity customer = new CustomerEntity();
+    customer.setBusinessId(BUSINESS_ID);
+    customer.setCustomerCode("C-003");
+    customer.setName("Old Name");
+    customer.setPhone("9999999999");
+    customer.setAddress("Old Address");
+    customer.setActive(false);
 
     FarmerEntity farmer = new FarmerEntity();
-    farmer.setFamily(family);
-    farmer.setFarmerCode("FAM003");
-    farmer.setName("Old Name");
-    farmer.setPhone("9999999999");
+    farmer.setBusinessId(BUSINESS_ID);
+    farmer.setCustomerId(CUSTOMER_ID);
+    farmer.setFarmerCode("F-003");
     farmer.setVillage("Old Village");
-    farmer.setAddress("Old Address");
-    farmer.setActive(false);
 
     UpdateFarmerRequest request =
         new UpdateFarmerRequest(
             "  Updated Name  ", " 8888888888 ", "  Updated Village ", " Updated Address ", true);
 
-    farmerMapper.updateEntity(request, farmer);
+    farmerMapper.updateCustomerEntity(request, customer);
+    farmerMapper.updateFarmerEntity(request, farmer);
 
     assertAll(
-        () -> assertSame(family, farmer.getFamily()),
-        () -> assertEquals("FAM003", farmer.getFarmerCode()),
-        () -> assertEquals("Updated Name", farmer.getName()),
-        () -> assertEquals("8888888888", farmer.getPhone()),
-        () -> assertEquals("Updated Village", farmer.getVillage()),
-        () -> assertEquals("Updated Address", farmer.getAddress()),
-        () -> assertTrue(farmer.isActive()));
+        () -> assertEquals(BUSINESS_ID, customer.getBusinessId()),
+        () -> assertEquals("C-003", customer.getCustomerCode()),
+        () -> assertEquals("Updated Name", customer.getName()),
+        () -> assertEquals("8888888888", customer.getPhone()),
+        () -> assertEquals("Updated Address", customer.getAddress()),
+        () -> assertTrue(customer.isActive()),
+        () -> assertEquals(BUSINESS_ID, farmer.getBusinessId()),
+        () -> assertEquals(CUSTOMER_ID, farmer.getCustomerId()),
+        () -> assertEquals("F-003", farmer.getFarmerCode()),
+        () -> assertEquals("Updated Village", farmer.getVillage()));
   }
 
   @Test
   void shouldNormalizeNullAndBlankOptionalFieldsDuringUpdate() {
 
+    CustomerEntity customer = new CustomerEntity();
+    customer.setName("Existing Name");
+    customer.setPhone("9999999999");
+    customer.setAddress("Existing Address");
+
     FarmerEntity farmer = new FarmerEntity();
-    farmer.setFamily(family);
-    farmer.setFarmerCode("FAM004");
-    farmer.setName("Existing Name");
+    farmer.setVillage("Existing Village");
 
     UpdateFarmerRequest request = new UpdateFarmerRequest("Updated Name", null, "   ", null, true);
 
-    farmerMapper.updateEntity(request, farmer);
+    farmerMapper.updateCustomerEntity(request, customer);
+    farmerMapper.updateFarmerEntity(request, farmer);
 
     assertAll(
-        () -> assertNull(farmer.getPhone()),
-        () -> assertNull(farmer.getVillage()),
-        () -> assertNull(farmer.getAddress()));
+        () -> assertNull(customer.getPhone()),
+        () -> assertNull(customer.getAddress()),
+        () -> assertNull(farmer.getVillage()));
   }
 
   @Test
-  void shouldMapFarmerEntityToResponse() {
+  void shouldMapCustomerAndFarmerEntitiesToResponse() {
+
+    CustomerEntity customer = new CustomerEntity();
+    customer.setName("Yogesh Pawar");
+    customer.setPhone("9876543210");
+    customer.setAddress("Maharashtra");
+    customer.setActive(true);
 
     FarmerEntity farmer = new FarmerEntity();
-    farmer.setFamily(family);
-    farmer.setFarmerCode("FAM005");
-    farmer.setName("Yogesh Pawar");
-    farmer.setPhone("9876543210");
+    farmer.setFarmerCode("F-005");
     farmer.setVillage("Pune");
-    farmer.setAddress("Maharashtra");
-    farmer.setActive(true);
 
-    FarmerResponse response = farmerMapper.toResponse(farmer);
+    FarmerResponse response = farmerMapper.toResponse(farmer, customer);
 
     assertAll(
         () -> assertNull(response.id()),
-        () -> assertEquals("FAM005", response.farmerCode()),
+        () -> assertEquals("F-005", response.farmerCode()),
         () -> assertEquals("Yogesh Pawar", response.name()),
         () -> assertEquals("9876543210", response.phone()),
         () -> assertEquals("Pune", response.village()),
