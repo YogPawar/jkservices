@@ -40,7 +40,7 @@ export default function EditFarmerPage() {
       setPageError("");
 
       try {
-        const response = await getFarmer(appConfig.familyId, farmerId);
+        const response = await getFarmer(appConfig.businessId, farmerId);
 
         if (!response.success) {
           throw new Error(response.message || "Unable to retrieve farmer");
@@ -87,7 +87,7 @@ export default function EditFarmerPage() {
 
     try {
       const response = await updateFarmer(
-        appConfig.familyId,
+        appConfig.businessId,
         farmerId,
         farmerData,
       );

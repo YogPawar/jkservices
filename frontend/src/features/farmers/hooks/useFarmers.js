@@ -8,19 +8,19 @@ import {
   deactivateFarmer,
 } from "../api/farmerService";
 
-export default function useFarmers(familyId) {
+export default function useFarmers(businessId) {
   const [farmers, setFarmers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
   const [error, setError] = useState(null);
 
   /**
-   * Retrieves all farmers for the current family.
+   * Retrieves all farmers for the current busines.
    */
   const loadFarmers = useCallback(async () => {
-    if (familyId === null || familyId === undefined || familyId === "") {
+    if (businessId === null || businessId === undefined || businessId === "") {
       setFarmers([]);
-      setError(new Error("Family ID is required"));
+      setError(new Error("Business ID is required"));
       return;
     }
 
@@ -28,7 +28,7 @@ export default function useFarmers(familyId) {
     setError(null);
 
     try {
-      const response = await getFarmers(familyId);
+      const response = await getFarmers(businessId);
 
       if (!response.success) {
         throw new Error(response.message || "Unable to retrieve farmers");
@@ -40,7 +40,7 @@ export default function useFarmers(familyId) {
     } finally {
       setIsLoading(false);
     }
-  }, [familyId]);
+  }, [businessId]);
 
   /**
    * Retrieves one farmer by ID.
@@ -50,7 +50,7 @@ export default function useFarmers(familyId) {
       setError(null);
 
       try {
-        const response = await getFarmer(familyId, farmerId);
+        const response = await getFarmer(businessId, farmerId);
 
         if (!response.success) {
           throw new Error(response.message || "Unable to retrieve farmer");
@@ -62,7 +62,7 @@ export default function useFarmers(familyId) {
         throw err;
       }
     },
-    [familyId],
+    [businessId],
   );
 
   /**
@@ -74,7 +74,7 @@ export default function useFarmers(familyId) {
       setError(null);
 
       try {
-        const response = await createFarmer(familyId, farmerData);
+        const response = await createFarmer(businessId, farmerData);
 
         if (!response.success) {
           throw new Error(response.message || "Unable to create farmer");
@@ -90,7 +90,7 @@ export default function useFarmers(familyId) {
         setIsMutating(false);
       }
     },
-    [familyId, loadFarmers],
+    [businessId, loadFarmers],
   );
 
   /**
@@ -102,7 +102,7 @@ export default function useFarmers(familyId) {
       setError(null);
 
       try {
-        const response = await updateFarmer(familyId, farmerId, farmerData);
+        const response = await updateFarmer(businessId, farmerId, farmerData);
 
         if (!response.success) {
           throw new Error(response.message || "Unable to update farmer");
@@ -118,7 +118,7 @@ export default function useFarmers(familyId) {
         setIsMutating(false);
       }
     },
-    [familyId, loadFarmers],
+    [businessId, loadFarmers],
   );
 
   /**
@@ -130,7 +130,7 @@ export default function useFarmers(familyId) {
       setError(null);
 
       try {
-        const response = await deactivateFarmer(familyId, farmerId);
+        const response = await deactivateFarmer(businessId, farmerId);
 
         if (!response.success) {
           throw new Error(response.message || "Unable to deactivate farmer");
@@ -146,7 +146,7 @@ export default function useFarmers(familyId) {
         setIsMutating(false);
       }
     },
-    [familyId, loadFarmers],
+    [businessId, loadFarmers],
   );
 
   /**

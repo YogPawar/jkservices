@@ -18,7 +18,7 @@ export default function AddFarmerPage() {
     setSubmitError("");
 
     try {
-      const response = await createFarmer(appConfig.familyId, farmerData);
+      const response = await createFarmer(appConfig.businessId, farmerData);
 
       if (!response.success) {
         throw new Error(response.message || "Unable to create farmer");
@@ -62,7 +62,7 @@ export default function AddFarmerPage() {
           </Typography>
 
           <Typography variant="body2" color="text.secondary">
-            Register a farmer in your family workspace.
+            Register a farmer in your business workspace.
           </Typography>
         </Box>
       </Stack>

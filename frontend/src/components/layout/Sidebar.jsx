@@ -67,7 +67,7 @@ export default function Sidebar({ onNavigate }) {
       <Divider sx={{ my: 2 }} />
 
       <Typography variant="caption" color="text.secondary">
-        Family workspace
+        Business workspace
       </Typography>
     </Box>
   );

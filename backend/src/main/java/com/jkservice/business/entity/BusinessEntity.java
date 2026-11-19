@@ -51,7 +51,7 @@ public class BusinessEntity {
   @Column(name = "address", columnDefinition = "text")
   private String address;
 
-  @Column(name = "currency_code", length = 3, nullable = false)
+  @Column(name = "currency_code", length = 3, nullable = false, columnDefinition = "CHAR(3)")
   private String currencyCode;
 
   @Column(name = "active", nullable = false)

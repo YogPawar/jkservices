@@ -34,7 +34,7 @@ export default function Topbar({ title, onMenuClick, showMenu }) {
         </Typography>
 
         <Chip
-          label="Family Admin"
+          label="Business Admin"
           color="success"
           variant="outlined"
           size="small"

@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   FormControl,
-  FormControlLabel,
   FormHelperText,
   InputLabel,
   MenuItem,
@@ -86,6 +85,7 @@ export default function FarmerForm({
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Stack spacing={2.5}>
           <TextField
+            id="farmer-name"
             name="name"
             label="Farmer Name"
             value={values.name}
@@ -98,6 +98,7 @@ export default function FarmerForm({
           />
 
           <TextField
+            id="farmer-phone"
             name="phone"
             label="Mobile Number"
             value={values.phone}
@@ -109,6 +110,7 @@ export default function FarmerForm({
           />
 
           <TextField
+            id="farmer-village"
             name="village"
             label="Village"
             value={values.village}
@@ -120,6 +122,7 @@ export default function FarmerForm({
           />
 
           <TextField
+            id="farmer-address"
             name="address"
             label="Address"
             value={values.address}
@@ -130,11 +133,15 @@ export default function FarmerForm({
           />
 
           <FormControl fullWidth error={Boolean(errors.active)}>
-            <InputLabel id="farmer-status-label">Status</InputLabel>
+            <InputLabel id="farmer-status-label" htmlFor="farmer-status">
+              Status
+            </InputLabel>
+
             <Select
+              id="farmer-status"
               labelId="farmer-status-label"
               name="active"
-              value={values.active}
+              value={String(values.active)}
               label="Status"
               onChange={(event) =>
                 handleChange({
@@ -148,6 +155,7 @@ export default function FarmerForm({
               <MenuItem value="true">Active</MenuItem>
               <MenuItem value="false">Inactive</MenuItem>
             </Select>
+
             {errors.active && <FormHelperText>{errors.active}</FormHelperText>}
           </FormControl>
 

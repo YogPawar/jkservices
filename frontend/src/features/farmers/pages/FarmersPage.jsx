@@ -30,7 +30,7 @@ export default function FarmersPage() {
   const location = useLocation();
 
   const { farmers, isLoading, isMutating, error, loadFarmers, removeFarmer } =
-    useFarmers(appConfig.familyId);
+    useFarmers(appConfig.businessId);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("ALL");
@@ -246,7 +246,8 @@ export default function FarmersPage() {
                 </Typography>
 
                 <Typography color="text.secondary" sx={{ mt: 1 }}>
-                  Farmers registered in your family workspace will appear here.
+                  Farmers registered in your business workspace will appear
+                  here.
                 </Typography>
 
                 <Button

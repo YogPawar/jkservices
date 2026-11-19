@@ -1,9 +1,9 @@
 /**
  * Temporary development configuration.
- * Replace with authenticated family context when User/Family modules are implemented.
+ * Replace with authenticated business context when User/Business modules are implemented.
  */
 const appConfig = {
-  familyId: 1,
+  businessId: 1,
 };
 
 export default appConfig;

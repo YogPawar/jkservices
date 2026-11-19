@@ -170,11 +170,11 @@ export default function DashboardPage() {
         </Typography>
 
         <Typography sx={{ mt: 1, opacity: 0.9 }}>
-          Welcome to JKServices — your family business overview.
+          Welcome to JKServices — your business overview.
         </Typography>
 
         <Chip
-          label="Family workspace"
+          label="Business workspace"
           sx={{
             mt: 2,
             color: "#ffffff",
