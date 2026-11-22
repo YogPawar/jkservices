@@ -1,4 +1,4 @@
-﻿import api from "../../../api/client";
+﻿import api from "../../../apiClient/apiClient";
 
 /**
  * Validates the business ID required for business-scoped operations.
@@ -88,4 +88,3 @@ export async function deactivateFarmer(businessId, farmerId) {
 
   return response.data;
 }
-

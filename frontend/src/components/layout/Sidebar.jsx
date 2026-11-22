@@ -11,6 +11,7 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
   { label: "Dashboard", path: "/" },
+  { label: "Organizations", path: "/organizations" },
   { label: "Farmers", path: "/farmers" },
   { label: "Daily Work", path: "/daily-work" },
   { label: "Billing", path: "/billing" },
@@ -36,7 +37,11 @@ export default function Sidebar({ onNavigate }) {
 
       <List>
         {menuItems.map((item) => {
-          const selected = location.pathname === item.path;
+          const selected =
+            item.path === "/"
+              ? location.pathname === "/"
+              : location.pathname === item.path ||
+                location.pathname.startsWith(`${item.path}/`);
 
           return (
             <ListItemButton

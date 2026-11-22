@@ -2,8 +2,8 @@ package com.jkservice.auth.api;
 
 import com.jkservice.auth.api.dto.response.RegistrationResponse;
 import com.jkservice.auth.application.RegistrationService;
-import com.jkservice.organization.dto.CreateOrganizationRequest;
-import com.jkservice.organization.dto.JoinOrganizationRequest;
+import com.jkservice.organization.dto.request.CreateOrganizationRequest;
+import com.jkservice.organization.dto.request.JoinOrganizationRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

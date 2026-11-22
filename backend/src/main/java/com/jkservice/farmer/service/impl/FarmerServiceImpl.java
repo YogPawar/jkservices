@@ -1,7 +1,7 @@
 package com.jkservice.farmer.service.impl;
 
 import com.jkservice.business.entity.BusinessEntity;
-import com.jkservice.business.repositroy.BusinessRepository;
+import com.jkservice.business.repository.BusinessRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.ResourceNotFoundException;
 import com.jkservice.customer.entity.CustomerEntity;
@@ -114,19 +114,19 @@ public class FarmerServiceImpl implements FarmerService {
     return business;
   }
 
-  private BusinessEntity getActiveFarmingBusiness(Long businessId) {
-    BusinessEntity business =
-        businessRepository
-            .findByIdAndActiveTrue(businessId)
-            .orElseThrow(() ->
-                new ResourceNotFoundException("Active business not found with ID: " + businessId));
+    private BusinessEntity getActiveFarmingBusiness(Long businessId) {
+      BusinessEntity business =
+          businessRepository
+              .findByIdAndActiveTrue(businessId)
+              .orElseThrow(() ->
+                  new ResourceNotFoundException("Active business not found with ID: " + businessId));
 
-    if (!FARMING_SERVICES.equals(business.getBusinessType())) {
-      throw new BusinessException("Farmer operations are only supported for farming businesses");
+      if (!FARMING_SERVICES.equals(business.getBusinessType())) {
+        throw new BusinessException("Farmer operations are only supported for farming businesses");
+      }
+
+      return business;
     }
-
-    return business;
-  }
 
   private FarmerEntity getFarmerEntity(Long businessId, Long farmerId) {
     return farmerRepository

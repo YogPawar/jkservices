@@ -2,16 +2,19 @@ package com.jkservice.auth.application;
 
 import com.jkservice.auth.api.dto.response.RegistrationResponse;
 import com.jkservice.auth.entity.AppUserEntity;
-import com.jkservice.auth.persistence.AppUserRepository;
+import com.jkservice.auth.repository.AppUserRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.DuplicateResourceException;
-import com.jkservice.organization.dto.CreateOrganizationRequest;
-import com.jkservice.organization.dto.JoinOrganizationRequest;
+import com.jkservice.organization.dto.request.CreateOrganizationRequest;
+import com.jkservice.organization.dto.request.JoinOrganizationRequest;
 import com.jkservice.organization.entity.OrganizationEntity;
 import com.jkservice.organization.entity.OrganizationMemberEntity;
+import com.jkservice.organization.enums.OrganizationMembershipStatus;
+import com.jkservice.organization.enums.OrganizationRole;
 import com.jkservice.organization.repository.OrganizationMemberRepository;
 import com.jkservice.organization.repository.OrganizationRepository;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -67,17 +70,17 @@ public class RegistrationService {
     OrganizationMemberEntity membership = new OrganizationMemberEntity();
     membership.setOrganizationId(organization.getId());
     membership.setUserId(user.getId());
-    membership.setRole("OWNER");
-    membership.setMembershipStatus("ACTIVE");
-    membership.setJoinedAt(LocalDateTime.now());
+    membership.setRole(OrganizationRole.OWNER);
+    membership.setMembershipStatus(OrganizationMembershipStatus.ACTIVE);
+    membership.setJoinedAt(Instant.now());
 
     membership = organizationMembers.save(membership);
 
     return new RegistrationResponse(
         user.getId(),
         organization.getId(),
-        membership.getRole(),
-        membership.getMembershipStatus(),
+        membership.getRole().name(),
+        membership.getMembershipStatus().name(),
         "Organization created. Invite code: " + organization.getInviteCode());
   }
 
@@ -106,8 +109,8 @@ public class RegistrationService {
     OrganizationMemberEntity membership = new OrganizationMemberEntity();
     membership.setOrganizationId(organization.getId());
     membership.setUserId(user.getId());
-    membership.setRole("MEMBER");
-    membership.setMembershipStatus("INVITED");
+    membership.setRole(OrganizationRole.MEMBER);
+    membership.setMembershipStatus(OrganizationMembershipStatus.INVITED);
     membership.setJoinedAt(null);
 
     membership = organizationMembers.save(membership);
@@ -115,8 +118,8 @@ public class RegistrationService {
     return new RegistrationResponse(
         user.getId(),
         organization.getId(),
-        membership.getRole(),
-        membership.getMembershipStatus(),
+        membership.getRole().name(),
+        membership.getMembershipStatus().name(),
         "Registration submitted. An OWNER or ADMIN must approve access.");
   }
 

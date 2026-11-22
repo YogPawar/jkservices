@@ -1,11 +1,8 @@
-server:
-  port: 8080
-
 spring:
   datasource:
-    url: ${DB_URL:jdbc:mysql://localhost:3307/jkservicedb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Kolkata}
-    username: ${DB_USERNAME:jk}
-    password: ${DB_PASSWORD:jkbro}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     properties:

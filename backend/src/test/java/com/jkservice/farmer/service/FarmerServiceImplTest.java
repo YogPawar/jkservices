@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.jkservice.business.entity.BusinessEntity;
-import com.jkservice.business.repositroy.BusinessRepository;
+import com.jkservice.business.repository.BusinessRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.ResourceNotFoundException;
 import com.jkservice.customer.entity.CustomerEntity;

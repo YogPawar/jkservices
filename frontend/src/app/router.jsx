@@ -9,18 +9,13 @@ import AddFarmerPage from "../features/farmers/pages/AddFarmerPage.jsx";
 import EditFarmerPage from "../features/farmers/pages/EditFarmerPage.jsx";
 import FarmerDetailsPage from "../features/farmers/pages/FarmerDetailsPage.jsx";
 
+import OrganizationPage from "../features/organization/pages/OrganizationPage.jsx";
+import AddOrganizationPage from "../features/organization/pages/AddOrganizationPage.jsx";
+import EditOrganizationPage from "../features/organization/pages/EditOrganizationPage.jsx";
+import OrganizationDetailsPage from "../features/organization/pages/OrganizationDetailsPage.jsx";
+
 function ModulePlaceholder({ title }) {
   return <Typography variant="h5">{title} — implementation pending</Typography>;
-}
-import { useLocation } from "react-router-dom";
-function RouteDiagnostic() {
-  const location = useLocation();
-
-  return (
-    <Typography color="error" sx={{ p: 2 }}>
-      Current route: {location.pathname}
-    </Typography>
-  );
 }
 
 const router = createBrowserRouter([
@@ -30,6 +25,18 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPage /> },
 
+      // Organization module
+      { path: "organizations", element: <OrganizationPage /> },
+      { path: "organizations/new", element: <AddOrganizationPage /> },
+      {
+        path: "organizations/:organizationId",
+        element: <OrganizationDetailsPage />,
+      },
+      {
+        path: "organizations/:organizationId/edit",
+        element: <EditOrganizationPage />,
+      },
+
       // Farmer module
       { path: "farmers", element: <FarmersPage /> },
       { path: "farmers/new", element: <AddFarmerPage /> },
@@ -37,39 +44,15 @@ const router = createBrowserRouter([
       { path: "farmers/:farmerId/edit", element: <EditFarmerPage /> },
 
       // Other modules
-      {
-        path: "daily-work",
-        element: <ModulePlaceholder title="Daily Work" />,
-      },
-      {
-        path: "billing",
-        element: <ModulePlaceholder title="Billing" />,
-      },
-      {
-        path: "payments",
-        element: <ModulePlaceholder title="Payments" />,
-      },
-      {
-        path: "ledger",
-        element: <ModulePlaceholder title="Farmer Ledger" />,
-      },
+      { path: "daily-work", element: <ModulePlaceholder title="Daily Work" /> },
+      { path: "billing", element: <ModulePlaceholder title="Billing" /> },
+      { path: "payments", element: <ModulePlaceholder title="Payments" /> },
+      { path: "ledger", element: <ModulePlaceholder title="Farmer Ledger" /> },
       {
         path: "reports",
         element: <ModulePlaceholder title="Monthly Reports" />,
       },
-      {
-        path: "users",
-        element: <ModulePlaceholder title="User Management" />,
-      },
-      {
-        path: "farmers",
-        element: (
-          <>
-            <RouteDiagnostic />
-            <FarmersPage />
-          </>
-        ),
-      },
+      { path: "users", element: <ModulePlaceholder title="User Management" /> },
     ],
   },
 ]);

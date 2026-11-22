@@ -14,7 +14,7 @@ public class OpenAPIConfig {
             new Info()
                 .title("JKServices API")
                 .description(
-                    "REST API's for JKServices family and agricultural work management platform.")
+                    "REST API's for JKServices business and agricultural work management platform.")
                 .version("v1"));
   }
 }

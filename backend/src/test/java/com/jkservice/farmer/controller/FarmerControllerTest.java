@@ -50,7 +50,7 @@ class FarmerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/families/10/farmers")
+            post("/api/v1/businesses/10/farmers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validRequest()))
         .andExpect(status().isCreated())
@@ -73,7 +73,7 @@ class FarmerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/families/10/farmers")
+            post("/api/v1/businesses/10/farmers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -93,30 +93,30 @@ class FarmerControllerTest {
   }
 
   @Test
-  void shouldReturn404WhenFamilyDoesNotExistDuringCreation() throws Exception {
+  void shouldReturn404WhenBusinessDoesNotExistDuringCreation() throws Exception {
 
     when(farmerService.createFarmer(eq(10L), any(CreateFarmerRequest.class)))
-        .thenThrow(new ResourceNotFoundException("Family not found with ID: 10"));
+        .thenThrow(new ResourceNotFoundException("Business not found with ID: 10"));
 
     mockMvc
         .perform(
-            post("/api/v1/families/10/farmers")
+            post("/api/v1/businesses/10/farmers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validRequest()))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"))
-        .andExpect(jsonPath("$.detail").value("Family not found with ID: 10"));
+        .andExpect(jsonPath("$.detail").value("Business not found with ID: 10"));
   }
 
   @Test
-  void shouldReturn400WhenFamilyIsInactiveDuringCreation() throws Exception {
+  void shouldReturn400WhenBusinessIsInactiveDuringCreation() throws Exception {
 
     when(farmerService.createFarmer(eq(10L), any(CreateFarmerRequest.class)))
-        .thenThrow(new BusinessException("Cannot create a farmer under an inactive family"));
+        .thenThrow(new BusinessException("Cannot create a farmer under an inactive business"));
 
     mockMvc
         .perform(
-            post("/api/v1/families/10/farmers")
+            post("/api/v1/businesses/10/farmers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validRequest()))
         .andExpect(status().isBadRequest())
@@ -131,7 +131,7 @@ class FarmerControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/families/10/farmers")
+            post("/api/v1/businesses/10/farmers")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(validRequest()))
         .andExpect(status().isConflict())
@@ -139,12 +139,12 @@ class FarmerControllerTest {
   }
 
   @Test
-  void shouldReturnAllFarmersForFamily() throws Exception {
+  void shouldReturnAllFarmersForBusiness() throws Exception {
 
     when(farmerService.getFarmers(10L)).thenReturn(List.of(farmerResponse()));
 
     mockMvc
-        .perform(get("/api/v1/families/10/farmers"))
+        .perform(get("/api/v1/businesses/10/farmers"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.message").value("Farmers retrieved successfully"))
@@ -156,12 +156,12 @@ class FarmerControllerTest {
   }
 
   @Test
-  void shouldReturnEmptyListWhenFamilyHasNoFarmers() throws Exception {
+  void shouldReturnEmptyListWhenBusinessBusinessHasNoFarmers() throws Exception {
 
     when(farmerService.getFarmers(10L)).thenReturn(List.of());
 
     mockMvc
-        .perform(get("/api/v1/families/10/farmers"))
+        .perform(get("/api/v1/businesses/10/farmers"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.data").isEmpty());
 
@@ -174,7 +174,7 @@ class FarmerControllerTest {
     when(farmerService.getFarmer(10L, 100L)).thenReturn(farmerResponse());
 
     mockMvc
-        .perform(get("/api/v1/families/10/farmers/100"))
+        .perform(get("/api/v1/businesses/10/farmers/100"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.id").value(100))
@@ -190,7 +190,7 @@ class FarmerControllerTest {
         .thenThrow(new ResourceNotFoundException("Farmer not found with ID: 999"));
 
     mockMvc
-        .perform(get("/api/v1/families/10/farmers/999"))
+        .perform(get("/api/v1/businesses/10/farmers/999"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));
   }
@@ -214,7 +214,7 @@ class FarmerControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/families/10/farmers/100")
+            put("/api/v1/businesses/10/farmers/100")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -241,7 +241,7 @@ class FarmerControllerTest {
 
     mockMvc
         .perform(
-            put("/api/v1/families/10/farmers/100")
+            put("/api/v1/businesses/10/farmers/100")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """
@@ -266,7 +266,7 @@ class FarmerControllerTest {
     doNothing().when(farmerService).deactivateFarmer(10L, 100L);
 
     mockMvc
-        .perform(delete("/api/v1/families/10/farmers/100"))
+        .perform(delete("/api/v1/businesses/10/farmers/100"))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.message").value("Farmer deactivated successfully"))
@@ -284,7 +284,7 @@ class FarmerControllerTest {
         .deactivateFarmer(10L, 999L);
 
     mockMvc
-        .perform(delete("/api/v1/families/10/farmers/999"))
+        .perform(delete("/api/v1/businesses/10/farmers/999"))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));
   }
