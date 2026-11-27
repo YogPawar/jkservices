@@ -22,6 +22,12 @@ import AddFarmerPage from "../features/farmers/pages/AddFarmerPage.jsx";
 import EditFarmerPage from "../features/farmers/pages/EditFarmerPage.jsx";
 import FarmerDetailsPage from "../features/farmers/pages/FarmerDetailsPage.jsx";
 
+// User Management module
+import UsersPage from "../features/users/pages/UsersPage.jsx";
+import CreateUserPage from "../features/users/pages/CreateUserPage.jsx";
+import EditUserPage from "../features/users/pages/EditUserPage.jsx";
+import UserDetailsPage from "../features/users/pages/UserDetailsPage.jsx";
+
 function ModulePlaceholder({ title }) {
   return <Typography variant="h5">{title} — implementation pending</Typography>;
 }
@@ -31,11 +37,21 @@ const router = createBrowserRouter([
     path: "/",
     element: <AppLayout />,
     children: [
-      { index: true, element: <DashboardPage /> },
+      // Dashboard
+      {
+        index: true,
+        element: <DashboardPage />,
+      },
 
       // Organization module
-      { path: "organizations", element: <OrganizationPage /> },
-      { path: "organizations/new", element: <AddOrganizationPage /> },
+      {
+        path: "organizations",
+        element: <OrganizationPage />,
+      },
+      {
+        path: "organizations/new",
+        element: <AddOrganizationPage />,
+      },
       {
         path: "organizations/:organizationId",
         element: <OrganizationDetailsPage />,
@@ -64,24 +80,62 @@ const router = createBrowserRouter([
       },
 
       // Farmer module
-      { path: "farmers", element: <FarmersPage /> },
-      { path: "farmers/new", element: <AddFarmerPage /> },
-      { path: "farmers/:farmerId", element: <FarmerDetailsPage /> },
-      { path: "farmers/:farmerId/edit", element: <EditFarmerPage /> },
+      {
+        path: "farmers",
+        element: <FarmersPage />,
+      },
+      {
+        path: "farmers/new",
+        element: <AddFarmerPage />,
+      },
+      {
+        path: "farmers/:farmerId",
+        element: <FarmerDetailsPage />,
+      },
+      {
+        path: "farmers/:farmerId/edit",
+        element: <EditFarmerPage />,
+      },
+
+      // User Management module
+      {
+        path: "users",
+        element: <UsersPage />,
+      },
+      {
+        path: "users/new",
+        element: <CreateUserPage />,
+      },
+      {
+        path: "users/:id",
+        element: <UserDetailsPage />,
+      },
+      {
+        path: "users/:id/edit",
+        element: <EditUserPage />,
+      },
 
       // Other modules
       {
         path: "daily-work",
         element: <ModulePlaceholder title="Daily Work" />,
       },
-      { path: "billing", element: <ModulePlaceholder title="Billing" /> },
-      { path: "payments", element: <ModulePlaceholder title="Payments" /> },
-      { path: "ledger", element: <ModulePlaceholder title="Farmer Ledger" /> },
+      {
+        path: "billing",
+        element: <ModulePlaceholder title="Billing" />,
+      },
+      {
+        path: "payments",
+        element: <ModulePlaceholder title="Payments" />,
+      },
+      {
+        path: "ledger",
+        element: <ModulePlaceholder title="Farmer Ledger" />,
+      },
       {
         path: "reports",
         element: <ModulePlaceholder title="Monthly Reports" />,
       },
-      { path: "users", element: <ModulePlaceholder title="User Management" /> },
     ],
   },
 ]);

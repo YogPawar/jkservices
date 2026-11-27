@@ -17,7 +17,7 @@ import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
 import PaymentsRoundedIcon from "@mui/icons-material/PaymentsRounded";
 import AccountBalanceWalletRoundedIcon from "@mui/icons-material/AccountBalanceWalletRounded";
 import AssessmentRoundedIcon from "@mui/icons-material/AssessmentRounded";
-import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
 import { NavLink, useLocation } from "react-router-dom";
 
@@ -34,6 +34,11 @@ const navigationGroups = [
         label: "Organizations",
         path: "/organizations",
         icon: BusinessRoundedIcon,
+      },
+      {
+        label: "User Management",
+        path: "/users",
+        icon: PeopleAltOutlinedIcon,
       },
     ],
   },
@@ -74,11 +79,6 @@ const navigationGroups = [
         label: "Monthly Reports",
         path: "/reports",
         icon: AssessmentRoundedIcon,
-      },
-      {
-        label: "User Management",
-        path: "/users",
-        icon: PeopleAltRoundedIcon,
       },
     ],
   },
