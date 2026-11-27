@@ -1,7 +1,8 @@
-package com.jkservice.auth.entity;
+package com.jkservice.user.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(
     name = "app_users",
@@ -17,7 +19,7 @@ import lombok.Setter;
           name = "uk_app_users_email",
           columnNames = {"email"})
     })
-public class AppUserEntity {
+public class UserEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,8 +39,15 @@ public class AppUserEntity {
   private boolean active;
 
   @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
-  private LocalDateTime createdAt;
+  private Instant createdAt;
 
   @Column(name = "updated_at", nullable = false, insertable = false, updatable = false)
-  private LocalDateTime updatedAt;
+  private Instant updatedAt;
+
+  public UserEntity(String fullName, String email, String passwordHash) {
+    this.fullName = fullName;
+    this.email = email;
+    this.passwordHash = passwordHash;
+    this.active = true;
+  }
 }

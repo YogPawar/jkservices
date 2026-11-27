@@ -87,12 +87,15 @@ const navigationGroups = [
 export default function Sidebar({ onNavigate }) {
   const location = useLocation();
 
-  // Identify the currently selected organization from the URL.
+  // Extract the active organization ID from the current URL.
   const organizationMatch = location.pathname.match(
-    /^\/organizations\/([^/]+)/,
+    /^\/organizations\/([^/]+)(?:\/|$)/,
   );
 
-  const activeOrganizationId = organizationMatch?.[1];
+  const activeOrganizationId =
+    organizationMatch && organizationMatch[1] !== "new"
+      ? organizationMatch[1]
+      : null;
 
   // Add organization-scoped Business navigation dynamically.
   const groups = navigationGroups.map((group) => {
@@ -113,6 +116,7 @@ export default function Sidebar({ onNavigate }) {
     };
   });
 
+  // Determine the active navigation item.
   const isSelected = (path) => {
     if (path === "/") {
       return location.pathname === "/";

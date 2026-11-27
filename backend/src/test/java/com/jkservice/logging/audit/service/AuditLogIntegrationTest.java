@@ -4,7 +4,7 @@
   import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
   import com.fasterxml.jackson.databind.ObjectMapper;
-  import com.jkservice.auth.entity.AppUserEntity;
+  import com.jkservice.user.entity.UserEntity;
   import com.jkservice.business.entity.BusinessEntity;
   import com.jkservice.business.mapper.BusinessMapper;
   import com.jkservice.business.service.impl.BusinessServiceImpl;
@@ -70,7 +70,7 @@
 
       OrganizationEntity organization = createOrganization("Audit Organization", "AUD-001");
 
-      AppUserEntity actor = createUser("audit-user@example.com");
+      UserEntity actor = createUser("audit-user@example.com");
 
       BusinessEntity business = createBusiness(organization, "Audit Business", "AUD-BUS-001");
 
@@ -171,9 +171,9 @@
       return organization;
     }
 
-    private AppUserEntity createUser(String email) {
+    private UserEntity createUser(String email) {
 
-      AppUserEntity user = new AppUserEntity();
+      UserEntity user = new UserEntity();
       user.setFullName("Audit Test User");
       user.setEmail(email);
       user.setPasswordHash("test-password-hash");

@@ -1,8 +1,8 @@
 package com.jkservice.auth.application;
 
-import com.jkservice.auth.api.dto.response.RegistrationResponse;
-import com.jkservice.auth.entity.AppUserEntity;
-import com.jkservice.auth.repository.AppUserRepository;
+import com.jkservice.auth.dto.response.RegistrationResponse;
+import com.jkservice.user.entity.UserEntity;
+import com.jkservice.user.repository.UserRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.DuplicateResourceException;
 import com.jkservice.organization.dto.request.CreateOrganizationRequest;
@@ -15,7 +15,6 @@ import com.jkservice.organization.repository.OrganizationMemberRepository;
 import com.jkservice.organization.repository.OrganizationRepository;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Locale;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -31,14 +30,14 @@ public class RegistrationService {
 
   private final OrganizationRepository organizations;
   private final OrganizationMemberRepository organizationMembers;
-  private final AppUserRepository users;
+  private final UserRepository users;
   private final BCryptPasswordEncoder encoder;
   private final SecureRandom random = new SecureRandom();
 
   public RegistrationService(
       OrganizationRepository organizations,
       OrganizationMemberRepository organizationMembers,
-      AppUserRepository users,
+      UserRepository users,
       BCryptPasswordEncoder encoder) {
     this.organizations = organizations;
     this.organizationMembers = organizationMembers;
@@ -59,7 +58,7 @@ public class RegistrationService {
 
     organization = organizations.save(organization);
 
-    AppUserEntity user = new AppUserEntity();
+    UserEntity user = new UserEntity();
     user.setFullName(request.fullName().trim());
     user.setEmail(email);
     user.setPasswordHash(encoder.encode(request.password()));
@@ -98,7 +97,7 @@ public class RegistrationService {
             .orElseThrow(
                 () -> new BusinessException("Invalid or inactive organization invite code"));
 
-    AppUserEntity user = new AppUserEntity();
+    UserEntity user = new UserEntity();
     user.setFullName(request.fullName().trim());
     user.setEmail(email);
     user.setPasswordHash(encoder.encode(request.password()));

@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import com.jkservice.auth.entity.AppUserEntity;
-import com.jkservice.auth.repository.AppUserRepository;
+import com.jkservice.user.entity.UserEntity;
+import com.jkservice.user.repository.UserRepository;
 import com.jkservice.common.exception.DuplicateResourceException;
 import com.jkservice.common.exception.ResourceNotFoundException;
 import com.jkservice.logging.audit.service.AuditLogService;
@@ -38,7 +38,7 @@ class OrganizationServiceImplTest {
 
   @Mock private OrganizationRepository organizationRepository;
   @Mock private OrganizationMemberRepository organizationMemberRepository;
-  @Mock private AppUserRepository appUserRepository;
+  @Mock private UserRepository userRepository;
   @Mock private OrganizationMapper organizationMapper;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private AuditLogService auditLogService;
@@ -67,13 +67,13 @@ class OrganizationServiceImplTest {
             new CreateOrganizationRequest(
                     " JK Services ", " Yogesh Pawar ", " YOGESH@EXAMPLE.COM ", "password123");
 
-    when(appUserRepository.existsByEmail("yogesh@example.com")).thenReturn(false);
+    when(userRepository.existsByEmail("yogesh@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
 
-    when(appUserRepository.save(any(AppUserEntity.class)))
+    when(userRepository.save(any(UserEntity.class)))
             .thenAnswer(
                     invocation -> {
-                      AppUserEntity user = invocation.getArgument(0);
+                      UserEntity user = invocation.getArgument(0);
                       user.setId(10L);
                       return user;
                     });
@@ -94,11 +94,11 @@ class OrganizationServiceImplTest {
 
     assertEquals(organizationResponse, result);
 
-    ArgumentCaptor<AppUserEntity> userCaptor =
-            ArgumentCaptor.forClass(AppUserEntity.class);
-    verify(appUserRepository).save(userCaptor.capture());
+    ArgumentCaptor<UserEntity> userCaptor =
+            ArgumentCaptor.forClass(UserEntity.class);
+    verify(userRepository).save(userCaptor.capture());
 
-    AppUserEntity savedUser = userCaptor.getValue();
+    UserEntity savedUser = userCaptor.getValue();
     assertEquals("Yogesh Pawar", savedUser.getFullName());
     assertEquals("yogesh@example.com", savedUser.getEmail());
     assertEquals("encoded-password", savedUser.getPasswordHash());
@@ -153,13 +153,13 @@ class OrganizationServiceImplTest {
             new CreateOrganizationRequest(
                     "JK Services", "Yogesh Pawar", "yogesh@example.com", "password123");
 
-    when(appUserRepository.existsByEmail("yogesh@example.com")).thenReturn(false);
+    when(userRepository.existsByEmail("yogesh@example.com")).thenReturn(false);
     when(passwordEncoder.encode("password123")).thenReturn("encoded-password");
 
-    when(appUserRepository.save(any(AppUserEntity.class)))
+    when(userRepository.save(any(UserEntity.class)))
             .thenAnswer(
                     invocation -> {
-                      AppUserEntity user = invocation.getArgument(0);
+                      UserEntity user = invocation.getArgument(0);
                       user.setId(10L);
                       return user;
                     });
@@ -189,13 +189,13 @@ class OrganizationServiceImplTest {
             new CreateOrganizationRequest(
                     "JK Services", "Yogesh Pawar", "YOGESH@EXAMPLE.COM", "password123");
 
-    when(appUserRepository.existsByEmail("yogesh@example.com")).thenReturn(true);
+    when(userRepository.existsByEmail("yogesh@example.com")).thenReturn(true);
 
     assertThrows(
             DuplicateResourceException.class,
             () -> organizationService.createOrganization(request));
 
-    verify(appUserRepository, never()).save(any());
+    verify(userRepository, never()).save(any());
     verify(organizationRepository, never()).save(any());
     verify(organizationMemberRepository, never()).save(any());
     verifyNoInteractions(passwordEncoder);

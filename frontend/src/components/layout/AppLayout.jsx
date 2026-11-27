@@ -26,8 +26,28 @@ function getPageTitle(pathname) {
     return "Edit Organization";
   }
 
+  if (/^\/organizations\/[^/]+\/businesses\/new$/.test(pathname)) {
+    return "Create Business";
+  }
+
+  if (/^\/organizations\/[^/]+\/businesses\/[^/]+\/edit$/.test(pathname)) {
+    return "Edit Business";
+  }
+
+  if (/^\/organizations\/[^/]+\/businesses\/[^/]+$/.test(pathname)) {
+    return "Business Details";
+  }
+
+  if (/^\/organizations\/[^/]+\/businesses$/.test(pathname)) {
+    return "Businesses";
+  }
+
   if (/^\/organizations\/[^/]+$/.test(pathname)) {
     return "Organization Details";
+  }
+
+  if (/^\/farmers\/new$/.test(pathname)) {
+    return "Add Farmer";
   }
 
   if (/^\/farmers\/[^/]+\/edit$/.test(pathname)) {

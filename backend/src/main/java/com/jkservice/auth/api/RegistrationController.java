@@ -1,6 +1,6 @@
 package com.jkservice.auth.api;
 
-import com.jkservice.auth.api.dto.response.RegistrationResponse;
+import com.jkservice.auth.dto.response.RegistrationResponse;
 import com.jkservice.auth.application.RegistrationService;
 import com.jkservice.organization.dto.request.CreateOrganizationRequest;
 import com.jkservice.organization.dto.request.JoinOrganizationRequest;
@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-public class AuthController {
+public class RegistrationController {
 
   private final RegistrationService service;
 
-  public AuthController(RegistrationService service) {
+  public RegistrationController(RegistrationService service) {
     this.service = service;
   }
 

@@ -1,7 +1,7 @@
 package com.jkservice.organization.service.impl;
 
-import com.jkservice.auth.entity.AppUserEntity;
-import com.jkservice.auth.repository.AppUserRepository;
+import com.jkservice.user.entity.UserEntity;
+import com.jkservice.user.repository.UserRepository;
 import com.jkservice.common.exception.DuplicateResourceException;
 import com.jkservice.common.exception.ResourceNotFoundException;
 import com.jkservice.logging.audit.service.AuditLogService;
@@ -39,7 +39,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
   private final OrganizationRepository organizationRepository;
   private final OrganizationMemberRepository organizationMemberRepository;
-  private final AppUserRepository appUserRepository;
+  private final UserRepository userRepository;
   private final OrganizationMapper organizationMapper;
   private final PasswordEncoder passwordEncoder;
   private final AuditLogService auditLogService;
@@ -52,19 +52,19 @@ public class OrganizationServiceImpl implements OrganizationService {
     String email = normalizeEmail(request.email());
 
     // 1. Check whether the user already exists.
-    if (appUserRepository.existsByEmail(email)) {
+    if (userRepository.existsByEmail(email)) {
       log.warn("Organization creation rejected: user email already registered");
       throw new DuplicateResourceException("User email already exists");
     }
 
     // 2. Create the initial user.
-    AppUserEntity user = new AppUserEntity();
+    UserEntity user = new UserEntity();
     user.setFullName(request.fullName().trim());
     user.setEmail(email);
     user.setPasswordHash(passwordEncoder.encode(request.password()));
     user.setActive(true);
 
-    AppUserEntity savedUser = appUserRepository.save(user);
+    UserEntity savedUser = userRepository.save(user);
 
     // 3. Create the organization.
     OrganizationEntity organization = new OrganizationEntity();
@@ -224,20 +224,20 @@ public class OrganizationServiceImpl implements OrganizationService {
             });
 
     // 2. Prevent duplicate user registration.
-    if (appUserRepository.existsByEmail(normalizedEmail)) {
+    if (userRepository.existsByEmail(normalizedEmail)) {
       log.warn("Organization join rejected: user email already registered");
 
       throw new DuplicateResourceException("An account with this email already exists");
     }
 
     // 3. Create the application user.
-    AppUserEntity user = new AppUserEntity();
+    UserEntity user = new UserEntity();
     user.setFullName(request.fullName().trim());
     user.setEmail(normalizedEmail);
     user.setPasswordHash(passwordEncoder.encode(request.password()));
     user.setActive(true);
 
-    AppUserEntity savedUser = appUserRepository.save(user);
+    UserEntity savedUser = userRepository.save(user);
 
     // 4. Create organization membership.
     OrganizationMemberEntity membership = new OrganizationMemberEntity();

@@ -7,10 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.jkservice.auth.api.dto.response.RegistrationResponse;
+import com.jkservice.auth.dto.response.RegistrationResponse;
 import com.jkservice.auth.application.RegistrationService;
-import com.jkservice.auth.entity.AppUserEntity;
-import com.jkservice.auth.repository.AppUserRepository;
+import com.jkservice.user.entity.UserEntity;
+import com.jkservice.user.repository.UserRepository;
 import com.jkservice.common.exception.BusinessException;
 import com.jkservice.common.exception.DuplicateResourceException;
 import com.jkservice.organization.dto.request.CreateOrganizationRequest;
@@ -34,7 +34,7 @@ class RegistrationServiceTest {
 
   @Mock private OrganizationMemberRepository organizationMembers;
 
-  @Mock private AppUserRepository users;
+  @Mock private UserRepository users;
 
   @Mock private BCryptPasswordEncoder encoder;
 
@@ -58,9 +58,9 @@ class RegistrationServiceTest {
           return entity;
         });
 
-    when(users.save(any(AppUserEntity.class)))
+    when(users.save(any(UserEntity.class)))
         .thenAnswer(invocation -> {
-          AppUserEntity entity = invocation.getArgument(0);
+          UserEntity entity = invocation.getArgument(0);
           entity.setId(20L);
           return entity;
         });
@@ -77,7 +77,7 @@ class RegistrationServiceTest {
 
     verify(users).existsByEmail("owner@example.com");
     verify(organizations).save(any(OrganizationEntity.class));
-    verify(users).save(any(AppUserEntity.class));
+    verify(users).save(any(UserEntity.class));
     verify(organizationMembers).save(any(OrganizationMemberEntity.class));
   }
 
@@ -98,9 +98,9 @@ class RegistrationServiceTest {
     when(organizations.findByInviteCodeAndActiveTrue("JKABC1234"))
         .thenReturn(Optional.of(organization));
 
-    when(users.save(any(AppUserEntity.class)))
+    when(users.save(any(UserEntity.class)))
         .thenAnswer(invocation -> {
-          AppUserEntity entity = invocation.getArgument(0);
+          UserEntity entity = invocation.getArgument(0);
           entity.setId(20L);
           return entity;
         });
@@ -117,7 +117,7 @@ class RegistrationServiceTest {
 
     verify(users).existsByEmail("member@example.com");
     verify(organizations).findByInviteCodeAndActiveTrue("JKABC1234");
-    verify(users).save(any(AppUserEntity.class));
+    verify(users).save(any(UserEntity.class));
     verify(organizationMembers).save(any(OrganizationMemberEntity.class));
   }
 
@@ -134,7 +134,7 @@ class RegistrationServiceTest {
 
     assertThrows(BusinessException.class, () -> service.joinOrganization(request));
 
-    verify(users, never()).save(any(AppUserEntity.class));
+    verify(users, never()).save(any(UserEntity.class));
     verify(organizationMembers, never()).save(any(OrganizationMemberEntity.class));
   }
 
@@ -150,7 +150,7 @@ class RegistrationServiceTest {
     assertThrows(DuplicateResourceException.class, () -> service.registerOrganization(request));
 
     verify(organizations, never()).save(any(OrganizationEntity.class));
-    verify(users, never()).save(any(AppUserEntity.class));
+    verify(users, never()).save(any(UserEntity.class));
     verify(organizationMembers, never()).save(any(OrganizationMemberEntity.class));
   }
 }
