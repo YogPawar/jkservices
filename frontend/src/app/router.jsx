@@ -9,6 +9,7 @@ import OrganizationPage from "../features/organization/pages/OrganizationPage.js
 import AddOrganizationPage from "../features/organization/pages/AddOrganizationPage.jsx";
 import EditOrganizationPage from "../features/organization/pages/EditOrganizationPage.jsx";
 import OrganizationDetailsPage from "../features/organization/pages/OrganizationDetailsPage.jsx";
+import OrganizationMembersPage from "../features/organization/pages/OrganizationMembersPage.jsx";
 
 // Business module
 import BusinessesPage from "../features/businesses/pages/BusinessesPage.jsx";
@@ -56,6 +57,12 @@ const router = createBrowserRouter([
         path: "organizations/:organizationId",
         element: <OrganizationDetailsPage />,
       },
+
+      {
+        path: "organizations/:organizationId/members",
+        element: <OrganizationMembersPage />,
+      },
+
       {
         path: "organizations/:organizationId/edit",
         element: <EditOrganizationPage />,

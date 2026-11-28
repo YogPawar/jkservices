@@ -15,6 +15,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import useOrganization from "../hooks/useOrganization";
 import OrganizationStatusChip from "../components/OrganizationStatusChip";
 
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+
 export default function OrganizationDetailsPage() {
   const { organizationId } = useParams();
   const navigate = useNavigate();
@@ -34,6 +37,7 @@ export default function OrganizationDetailsPage() {
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
+        alignItems={{ xs: "stretch", sm: "center" }}
         spacing={2}
       >
         <Box>
@@ -43,14 +47,25 @@ export default function OrganizationDetailsPage() {
           <Typography color="text.secondary">Organization details</Typography>
         </Box>
 
-        {organization.active && (
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
           <Button
-            variant="contained"
-            onClick={() => navigate(`/organizations/${organizationId}/edit`)}
+            variant="outlined"
+            startIcon={<PeopleAltOutlinedIcon />}
+            onClick={() => navigate(`/organizations/${organizationId}/members`)}
           >
-            Edit organization
+            Manage Members
           </Button>
-        )}
+
+          {organization.active && (
+            <Button
+              variant="contained"
+              startIcon={<EditOutlinedIcon />}
+              onClick={() => navigate(`/organizations/${organizationId}/edit`)}
+            >
+              Edit Organization
+            </Button>
+          )}
+        </Stack>
       </Stack>
 
       <Paper variant="outlined" sx={{ p: 3 }}>

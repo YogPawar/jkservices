@@ -12,22 +12,22 @@ export const userApi = {
       },
     });
 
-    return response.data.data;
+    return response.data;
   },
 
   async getUserById(id) {
     const response = await apiClient.get(`${BASE_URL}/${id}`);
-    return response.data.data;
+    return response.data;
   },
 
   async createUser(payload) {
     const response = await apiClient.post(BASE_URL, payload);
-    return response.data.data;
+    return response.data;
   },
 
   async updateUser(id, payload) {
     const response = await apiClient.put(`${BASE_URL}/${id}`, payload);
-    return response.data.data;
+    return response.data;
   },
 
   async updateUserStatus(id, active) {
@@ -35,6 +35,6 @@ export const userApi = {
       active,
     });
 
-    return response.data.data;
+    return response.data;
   },
 };
